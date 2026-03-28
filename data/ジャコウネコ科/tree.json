@@ -1,4 +1,5 @@
 {
+  "_collapsed": false,
   "children": [
     {
       "children": [
@@ -67,7 +68,9 @@
               "description": "南アジアおよび東南アジアに広く生息するジャコウネコ科の動物です。コーヒーチェリーを食べ、その排泄物からコピ・ルアクが作られます。",
               "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Pallas_PS_by_Tardier_grey.jpg/500px-Pallas_PS_by_Tardier_grey.jpg",
               "discoverer_name": "Peter Simon Pallas",
-              "groups": [],
+              "groups": [
+                "group_1774687183771"
+              ],
               "id": "paradoxurus_hermaphroditus",
               "images": [
                 "https://upload.wikimedia.org/wikipedia/commons/d/d0/Paradox_hermaph_060924_ltn.jpg"
@@ -80,7 +83,9 @@
           "description": "アジアに生息する樹上性のジャコウネコ科の属です。果実を主食とし、特にコーヒー豆を食べることで有名です。",
           "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/2/23/Fr%C3%A9d%C3%A9ric_Cuvier_by_Ambroise_Tardieu.jpg",
           "discoverer_name": "Frédéric Cuvier",
-          "groups": [],
+          "groups": [
+            "group_1774687183771"
+          ],
           "id": "paradoxurus",
           "images": [
             "https://upload.wikimedia.org/wikipedia/commons/d/d0/Paradox_hermaph_060924_ltn.jpg"
@@ -140,7 +145,9 @@
               "description": "南アジアから東南アジアにかけて生息するジャコウネコです。夜行性で、昆虫、鳥、小型哺乳類などを捕食します。",
               "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Carl_von_Linn%C3%A9%2C_1707-1778%2C_botanist%2C_professor_%28Alexander_Roslin%29_-_Nationalmuseum_-_15723_%28cropped%29.tif/lossy-page1-500px-Carl_von_Linn%C3%A9%2C_1707-1778%2C_botanist%2C_professor_%28Alexander_Roslin%29_-_Nationalmuseum_-_15723_%28cropped%29.tif.jpg",
               "discoverer_name": "Carl Linnaeus",
-              "groups": [],
+              "groups": [
+                "group_1774687183771"
+              ],
               "id": "viverra_zibetha",
               "images": [
                 "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Large_Indian_Civet%2C_Viverra_zibetha_in_Kaeng_Krachan_national_park.jpg/500px-Large_Indian_Civet%2C_Viverra_zibetha_in_Kaeng_Krachan_national_park.jpg"
@@ -153,7 +160,9 @@
           "description": "アジアに生息するジャコウネコ科の属で、主に地上性です。体には斑点や縞模様があり、ジャコウを分泌します。",
           "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Carl_von_Linn%C3%A9%2C_1707-1778%2C_botanist%2C_professor_%28Alexander_Roslin%29_-_Nationalmuseum_-_15723_%28cropped%29.tif/lossy-page1-500px-Carl_von_Linn%C3%A9%2C_1707-1778%2C_botanist%2C_professor_%28Alexander_Roslin%29_-_Nationalmuseum_-_15723_%28cropped%29.tif.jpg",
           "discoverer_name": "Carl Linnaeus",
-          "groups": [],
+          "groups": [
+            "group_1774687183771"
+          ],
           "id": "viverra",
           "images": [
             "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Viverra_zibetha_ras.jpg/500px-Viverra_zibetha_ras.jpg"
@@ -360,7 +369,12 @@
   ],
   "name_ja": "ジャコウネコ科",
   "name_sci": "Viverridae",
-  "polyphyletic_groups": [],
-  "status": "normal",
-  "_collapsed": false
+  "polyphyletic_groups": [
+    {
+      "id": "group_1774687183771",
+      "name": "A類",
+      "color": "#8a2be2"
+    }
+  ],
+  "status": "normal"
 }

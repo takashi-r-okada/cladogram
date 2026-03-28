@@ -9,16 +9,62 @@
         
         body { font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP", "Times New Roman", serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; background-color: var(--bg-color); color: var(--text-color); }
         
-        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1.5rem; background-color: #fafafa; border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02); z-index: 10; }
-        .header-left, .header-center, .header-right { display: flex; align-items: center; gap: 1rem; }
-        .header-center { flex-grow: 1; justify-content: center; font-size: 0.9rem; gap: 1rem; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.9rem; background-color: #fafafa; border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02); z-index: 10; }
+        .header-left, .header-center, .header-right { display: flex; align-items: center; gap: 0.6rem; }
+        .header-center { flex-grow: 1; justify-content: center; font-size: 0.8rem; gap: 0.6rem; }
+        .top-header label,
+        .top-header span,
+        .top-header select,
+        .top-header button,
+        .top-header a {
+            font-size: 0.78rem;
+            line-height: 1.2;
+        }
         
         .top-header h1 { font-size: 1.2rem; margin: 0; font-weight: normal; letter-spacing: 1px; }
-        a.back-link { display: inline-block; color: var(--accent-color); text-decoration: none; font-size: 0.9rem; transition: 0.2s; border-bottom: 1px solid transparent; }
+        a.back-link { display: inline-block; color: var(--accent-color); text-decoration: none; font-size: 0.78rem; transition: 0.2s; border-bottom: 1px solid transparent; }
         a.back-link:hover { border-bottom-color: var(--accent-color); }
 
-        .lang-switch button { background: none; border: none; font-family: inherit; font-size: 0.9rem; cursor: pointer; color: #999; padding: 0 0.3rem; }
+        .lang-switch button { background: none; border: none; font-family: inherit; font-size: 0.78rem; cursor: pointer; color: #999; padding: 0 0.2rem; }
         .lang-switch button.active { color: var(--text-color); font-weight: bold; }
+        .header-separator { border-left: 1px solid var(--border-color); height: 1.1rem; margin: 0 0.25rem; }
+        .header-help-wrap { position: relative; display: inline-flex; align-items: center; margin-left: 0.35rem; }
+        .header-help-trigger {
+            width: 1.15rem;
+            height: 1.15rem;
+            border-radius: 50%;
+            border: 1px solid #bcbcbc;
+            background: #fff;
+            color: #888;
+            font-size: 0.72rem;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            padding: 0;
+        }
+        .header-help-tooltip {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            z-index: 20;
+            display: none;
+            min-width: 310px;
+            max-width: 420px;
+            padding: 0.35rem 0.5rem;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            color: #777;
+            font-size: 0.7rem;
+            line-height: 1.35;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .header-help-wrap:hover .header-help-tooltip,
+        .header-help-wrap:focus-within .header-help-tooltip {
+            display: block;
+        }
 
         .main-area { display: flex; flex-grow: 1; overflow: hidden; width: 100%; }
         .main-content { flex-grow: 1; position: relative; background-color: #fff; }
@@ -45,7 +91,7 @@
         .node text { font-family: inherit; font-size: var(--tree-font-size, 13px); fill: var(--text-color); transition: opacity 0.3s; pointer-events: none;}
         .link { fill: none; stroke: #ccc; stroke-width: 1px; transition: opacity 0.3s; }
         .sci-name { font-family: "Times New Roman", serif; font-style: italic; font-size: var(--tree-font-size-sci, 12px); }
-        .fontsize-btn { background: none; border: 1px solid var(--border-color); cursor: pointer; padding: 0.1rem 0.45rem; font-family: inherit; font-size: 0.8rem; line-height: 1.4; color: var(--text-color); transition: 0.2s; }
+        .fontsize-btn { background: none; border: 1px solid var(--border-color); cursor: pointer; padding: 0.08rem 0.35rem; font-family: inherit; font-size: 0.74rem; line-height: 1.3; color: var(--text-color); transition: 0.2s; }
         .fontsize-btn:hover { background: var(--text-color); color: #fff; }
         
         #toast { position: fixed; bottom: 30px; left: 30px; background: var(--text-color); color: white; padding: 10px 20px; font-family: inherit; border-radius: 2px; display: none; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); letter-spacing: 1px;}
@@ -71,7 +117,7 @@
 
         /* 閲覧モード（高密度）用のスタイル */
         .view-img-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 1rem; }
-        .view-img-hero { grid-column: span 4; width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 3px; border: 1px solid var(--border-color); background: #eee;}
+        .view-img-hero { grid-column: span 4; width: 100%; aspect-ratio: 1/1; object-fit: contain; object-position: center; border-radius: 3px; border: 1px solid var(--border-color); background: #eee;}
         .view-img-thumb { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 2px; border: 1px solid var(--border-color); cursor: pointer; transition: 0.2s; background: #eee;}
         .view-img-thumb:hover { filter: brightness(0.8); }
 
@@ -96,21 +142,24 @@
             <label><input type="radio" name="linkStyle" value="ortho" checked onchange="changeLinkStyle()"> <span data-i18n="style_ortho">直角</span></label>
             <label><input type="radio" name="linkStyle" value="radial" onchange="changeLinkStyle()"> <span data-i18n="style_radial">半円</span></label>
             
-            <span style="border-left: 1px solid var(--border-color); height: 1.5rem; margin: 0 0.5rem;"></span>
+            <span class="header-separator"></span>
             
             <span data-i18n="label_highlight" style="color: var(--accent-color);">強調:</span>
-            <select id="select-highlight" onchange="renderTree()" style="padding: 0.2rem 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem; font-family: inherit; background: #fff; min-width: 100px;">
+            <select id="select-highlight" onchange="renderTree()" style="padding: 0.12rem 0.35rem; border: 1px solid var(--border-color); border-radius: 4px; font-family: inherit; background: #fff; min-width: 90px;">
                 <option value="" data-i18n="val_none">なし</option>
             </select>
 
-            <span style="border-left: 1px solid var(--border-color); height: 1.5rem; margin: 0 0.5rem;"></span>
+            <span class="header-separator"></span>
 
             <span data-i18n="label_fontsize" style="color: var(--accent-color);">文字:</span>
             <button class="fontsize-btn" onclick="changeFontSize(-1)">A−</button>
-            <span id="fontsize-display" style="font-size: 0.82rem; min-width: 2.8em; text-align: center; display: inline-block;">13px</span>
+            <span id="fontsize-display" style="min-width: 2.8em; text-align: center; display: inline-block;">13px</span>
             <button class="fontsize-btn" onclick="changeFontSize(1)">A＋</button>
 
-            <span style="font-size: 0.75rem; color: #aaa; margin-left: 1rem;" data-i18n="scroll_help">※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺), Wクリック(折畳)</span>
+            <span class="header-help-wrap" aria-label="help">
+                <button type="button" class="header-help-trigger" aria-label="操作ヘルプ">?</button>
+                <span class="header-help-tooltip" data-i18n="scroll_help">※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺), Wクリック(折畳)</span>
+            </span>
         </div>
 
         <div class="header-right">
@@ -782,7 +831,7 @@
             svgRoot.on("wheel", (event) => {
                 event.preventDefault();
                 const currentTransform = d3.zoomTransform(svgRoot.node());
-                if (event.ctrlKey || event.metaKey) zoom.scaleBy(svgRoot, Math.pow(2, -event.deltaY * 0.01));
+                if (event.ctrlKey || event.metaKey) zoom.scaleBy(svgRoot, Math.pow(2, -event.deltaY * 0.004));
                 else if (event.shiftKey) zoom.translateBy(svgRoot, -event.deltaY / currentTransform.k, 0);
                 else zoom.translateBy(svgRoot, -event.deltaX / currentTransform.k, -event.deltaY / currentTransform.k);
             });
@@ -960,9 +1009,11 @@
                     d.data.groups.forEach((groupId, i) => {
                         const gInfo = globalGroups.find(g => g.id === groupId);
                         if (gInfo) {
-                            const tagX = isLeft ? startX - (i * 12) - 8 : startX + (i * 12);
-                            groupG.append("rect")
-                                .attr("x", tagX).attr("y", 32).attr("width", 8).attr("height", 8).attr("rx", 2) 
+                            const tagDiameter = 24;
+                            const tagSpacing = 28;
+                            const tagX = isLeft ? startX - (i * tagSpacing) - tagDiameter : startX + (i * tagSpacing);
+                            groupG.append("circle")
+                                .attr("cx", tagX + (tagDiameter / 2)).attr("cy", 44).attr("r", tagDiameter / 2)
                                 .style("fill", gInfo.color)
                                 .append("title").text(gInfo.name); 
                         }
