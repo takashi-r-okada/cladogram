@@ -7,13 +7,11 @@
     <style>
         :root { --bg-color: #fcfcfc; --text-color: #222; --border-color: #ddd; --accent-color: #555; }
         
-        /* 全体のレイアウトを Flexbox(縦方向) に変更 */
         body { font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP", "Times New Roman", serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; background-color: var(--bg-color); color: var(--text-color); }
         
-        /* 上部のヘッダーバー */
         .top-header { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1.5rem; background-color: #fafafa; border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02); z-index: 10; }
         .header-left, .header-center, .header-right { display: flex; align-items: center; gap: 1rem; }
-        .header-center { flex-grow: 1; justify-content: center; font-size: 0.9rem; gap: 1.5rem; }
+        .header-center { flex-grow: 1; justify-content: center; font-size: 0.9rem; gap: 1rem; }
         
         .top-header h1 { font-size: 1.2rem; margin: 0; font-weight: normal; letter-spacing: 1px; }
         a.back-link { display: inline-block; color: var(--accent-color); text-decoration: none; font-size: 0.9rem; transition: 0.2s; border-bottom: 1px solid transparent; }
@@ -22,12 +20,11 @@
         .lang-switch button { background: none; border: none; font-family: inherit; font-size: 0.9rem; cursor: pointer; color: #999; padding: 0 0.3rem; }
         .lang-switch button.active { color: var(--text-color); font-weight: bold; }
 
-        /* メイン描画エリアと右パネルの配置 */
         .main-area { display: flex; flex-grow: 1; overflow: hidden; width: 100%; }
         .main-content { flex-grow: 1; position: relative; background-color: #fff; }
         #tree-container { width: 100%; height: 100%; }
 
-        .sidebar { width: 380px; background: #fafafa; padding: 2rem; box-sizing: border-box; overflow-y: auto; border-left: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: -4px 0 15px rgba(0,0,0,0.02); }
+        .sidebar { width: 380px; background: #fafafa; padding: 1.5rem; box-sizing: border-box; overflow-y: auto; border-left: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: -4px 0 15px rgba(0,0,0,0.02); }
         
         .info-panel h3 { margin-top: 0; font-size: 1.1rem; font-weight: normal; border-bottom: 1px dotted var(--border-color); padding-bottom: 0.5rem; letter-spacing: 1px; }
         
@@ -43,19 +40,18 @@
         button.action-btn.danger { border-color: #8a2be2; color: #8a2be2; }
         button.action-btn.danger:hover { background: #8a2be2; color: #fff; }
 
-        .node circle { fill: #fff; stroke: var(--text-color); stroke-width: 1.5px; cursor: pointer; transition: 0.2s; }
-        .node circle:hover { fill: #eee; }
-        .node text { font-family: inherit; font-size: 13px; fill: var(--text-color); }
-        .node--internal circle { fill: var(--text-color); }
-        .link { fill: none; stroke: #ccc; stroke-width: 1px; }
+        .node circle { cursor: pointer; transition: 0.2s; }
+        .node circle:hover { opacity: 0.8; }
+        .node text { font-family: inherit; font-size: 13px; fill: var(--text-color); transition: opacity 0.3s; pointer-events: none;}
+        .link { fill: none; stroke: #ccc; stroke-width: 1px; transition: opacity 0.3s; }
         .sci-name { font-family: "Times New Roman", serif; font-style: italic; font-size: 12px; }
         
         #toast { position: fixed; bottom: 30px; left: 30px; background: var(--text-color); color: white; padding: 10px 20px; font-family: inherit; border-radius: 2px; display: none; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); letter-spacing: 1px;}
         
+        /* 編集用の画像ギャラリー */
         .thumbnail-container { position: relative; border: 1px solid var(--border-color); padding: 4px; background: #fff; } 
         .thumbnail { width: 90px; height: 90px; object-fit: cover; display: block; filter: grayscale(20%); transition: filter 0.3s; }
         .thumbnail:hover { filter: grayscale(0%); }
-        
         .btn-delete-img { position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; background: #fff; color: var(--text-color); border: 1px solid var(--text-color); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; font-family: sans-serif; transition: 0.2s; }
         .btn-delete-img:hover { background: var(--text-color); color: #fff; }
 
@@ -68,10 +64,16 @@
         .poly-badge .remove-btn:hover { color: #d33; }
         
         .color-display { font-family: "Courier New", monospace; font-size: 0.85rem; letter-spacing: 0.5px; }
-        .view-text-val { font-size: 1rem; padding-bottom: 0.3rem; border-bottom: 1px solid #eee; margin-bottom: 1rem; }
-        
         .discoverer-box { border: 1px solid var(--border-color); padding: 0.8rem; background: #fff; border-radius: 2px; }
         .discoverer-box label { font-size: 0.75rem; color: #888; margin-top: 0.5rem; }
+
+        /* 閲覧モード（高密度）用のスタイル */
+        .view-img-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 1rem; }
+        .view-img-hero { grid-column: span 4; width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 3px; border: 1px solid var(--border-color); background: #eee;}
+        .view-img-thumb { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 2px; border: 1px solid var(--border-color); cursor: pointer; transition: 0.2s; background: #eee;}
+        .view-img-thumb:hover { filter: brightness(0.8); }
+
+        .poly-badge-small { display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: 12px; font-size: 0.7rem; background: #fff; border: 1px solid var(--border-color); font-family: sans-serif; }
     </style>
 </head>
 <body>
@@ -91,7 +93,15 @@
             <label><input type="radio" name="linkStyle" value="curve" onchange="changeLinkStyle()"> <span data-i18n="style_curve">曲線</span></label>
             <label><input type="radio" name="linkStyle" value="ortho" checked onchange="changeLinkStyle()"> <span data-i18n="style_ortho">直角</span></label>
             <label><input type="radio" name="linkStyle" value="radial" onchange="changeLinkStyle()"> <span data-i18n="style_radial">半円</span></label>
-            <span style="font-size: 0.75rem; color: #aaa; margin-left: 1rem;" data-i18n="scroll_help">※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺)</span>
+            
+            <span style="border-left: 1px solid var(--border-color); height: 1.5rem; margin: 0 0.5rem;"></span>
+            
+            <span data-i18n="label_highlight" style="color: var(--accent-color);">強調:</span>
+            <select id="select-highlight" onchange="renderTree()" style="padding: 0.2rem 0.5rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem; font-family: inherit; background: #fff; min-width: 100px;">
+                <option value="" data-i18n="val_none">なし</option>
+            </select>
+
+            <span style="font-size: 0.75rem; color: #aaa; margin-left: 1rem;" data-i18n="scroll_help">※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺), Wクリック(折畳)</span>
         </div>
 
         <div class="header-right">
@@ -108,115 +118,122 @@
         </div>
 
         <div class="sidebar">
-            {% if can_edit %}
-            <div class="info-panel" id="editor-panel" style="display: none; margin-top: 0;">
-                <h3 data-i18n="edit_title">記載情報の編集</h3>
-                <div class="form-group">
-                    <label data-i18n="label_ja">和名 (一般名)</label>
-                    <input type="text" id="input-name-ja">
-                </div>
-                <div class="form-group">
-                    <label data-i18n="label_sci">学名</label>
-                    <input type="text" id="input-name-sci" style="font-style: italic; font-family: 'Times New Roman', serif;">
-                </div>
+            
+            <div id="node-panel-container" style="display: none;">
                 
-                <div class="form-group">
-                    <label data-i18n="label_status">生存状況</label>
-                    <select id="input-status">
-                        <option value="normal" data-i18n="status_normal">現存 (指定なし)</option>
-                        <option value="endangered" data-i18n="status_endangered">絶滅危惧 (EN)</option>
-                        <option value="extinct" data-i18n="status_extinct">絶滅 (EX)</option>
-                    </select>
-                </div>
+                <div id="viewer-panel">
+                    
+                    <div id="view-image-gallery" class="view-img-grid"></div>
 
-                <div class="form-group">
-                    <label data-i18n="label_desc">簡単な説明</label>
-                    <textarea id="input-desc" rows="3" placeholder="特徴や分布などを記載..."></textarea>
-                </div>
-
-                <div class="form-group discoverer-box">
-                    <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px dotted #ccc; padding-bottom: 0.3rem;" data-i18n="label_discoverer">発見者</div>
-                    <label data-i18n="label_discoverer_name">名前</label>
-                    <input type="text" id="input-discoverer-name" style="margin-bottom: 0.5rem;">
-                    <label data-i18n="label_discoverer_img">写真URL</label>
-                    <input type="text" id="input-discoverer-img" placeholder="http://..." style="font-family: sans-serif;">
-                </div>
-
-                <div style="margin-bottom: 1rem; margin-top: 1.5rem;">
-                    <button class="action-btn" onclick="updateNode()" data-i18n="btn_update">記載事項の更新</button>
-                    <button class="action-btn" onclick="addChildNode()" data-i18n="btn_add">＋ 派生群の追加</button>
-                    <button class="action-btn danger" onclick="deleteNode()" data-i18n="btn_del_node">ー 当該節の破棄</button>
-                </div>
-
-                <div style="border-top: 1px dotted var(--border-color); padding-top: 1.5rem; margin-bottom: 1rem;">
-                    <h3 data-i18n="poly_title">多系統群の所属</h3>
-                    <div id="node-groups-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;"></div>
-                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
-                        <select id="select-existing-group" style="flex-grow: 1; padding: 0.4rem; border: 1px solid var(--border-color); font-family: sans-serif;"></select>
-                        <button class="action-btn" id="btn-add-existing-group" style="width: auto; margin: 0; padding: 0.4rem 0.8rem;" onclick="addNodeToGroup()" data-i18n="btn_register">登録</button>
-                    </div>
-                    <div style="background: #fff; padding: 1rem; border: 1px solid var(--border-color);">
-                        <div style="font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--accent-color);" data-i18n="new_group_title">新規グループの定義</div>
-                        <input type="text" id="input-new-group-name" placeholder="名称 (例: A類)" style="width: 100%; padding: 0.4rem; margin-bottom: 0.5rem; border: 1px solid var(--border-color); font-family: sans-serif; box-sizing: border-box;">
-                        <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem;">
-                            <input type="color" id="input-new-group-color" value="#8a2be2" onchange="updateColorDisplay()" oninput="updateColorDisplay()" style="cursor: pointer;">
-                            <span id="color-bgr-display" class="color-display">[226, 43, 138]</span>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <div style="flex-grow: 1;">
+                            <h2 id="view-name-ja" style="margin: 0; font-size: 1.5rem; line-height: 1.2;"></h2>
+                            <div id="view-name-sci" style="font-family: 'Times New Roman', serif; font-style: italic; color: #666; font-size: 1rem; margin-top: 0.2rem;"></div>
                         </div>
-                        <button class="action-btn" style="margin:0; padding: 0.4rem;" onclick="createNewGroup()" data-i18n="btn_create_group">定義して追加</button>
+                        {% if can_edit %}
+                        <button onclick="setEditMode(true)" class="action-btn" style="width: auto; padding: 0.2rem 0.6rem; font-size: 0.8rem; margin: 0 0 0 0.5rem;" data-i18n="btn_edit">編集</button>
+                        {% endif %}
+                    </div>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border-color);">
+                        <span id="view-status-badge" style="font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 3px; font-weight: bold; border: 1px solid transparent; font-family: sans-serif;"></span>
+                        <div id="view-groups-container" style="display: flex; flex-wrap: wrap; gap: 0.3rem;"></div>
+                    </div>
+
+                    <div id="view-desc" style="font-size: 0.95rem; line-height: 1.7; color: #333; white-space: pre-wrap; margin-bottom: 1.5rem;"></div>
+
+                    <div id="view-discoverer-container" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #555; background: #fff; padding: 0.5rem 0.8rem; border: 1px solid var(--border-color); border-radius: 3px;">
+                        <span data-i18n="label_discoverer" style="font-weight:bold;">発見者:</span>
+                        <img id="view-discoverer-img" src="" style="width: 24px; height: 24px; object-fit: cover; border-radius: 50%; display: none;">
+                        <span id="view-discoverer-name"></span>
+                    </div>
+
+                    <div id="viewer-collapse-box" style="margin-top: 1.5rem; display: none;">
+                        <button class="action-btn" id="btn-viewer-collapse" onclick="toggleCollapse()" style="border-style: dashed;"></button>
                     </div>
                 </div>
 
-                <div style="border-top: 1px dotted var(--border-color); padding-top: 1.5rem;">
-                    <h3 data-i18n="image_title">標本図版の追加</h3>
-                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                        <input type="text" id="input-image-url" placeholder="URL (http://...)" style="flex-grow: 1; padding: 0.4rem; border: 1px solid var(--border-color); font-family: sans-serif; font-size: 0.8rem;">
-                        <button class="action-btn" style="width: auto; margin: 0; padding: 0.4rem 0.8rem;" onclick="addImageUrl()" data-i18n="btn_register">登録</button>
+                {% if can_edit %}
+                <div id="editor-panel" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted var(--border-color); margin-bottom: 1rem; padding-bottom: 0.5rem;">
+                        <h3 style="margin: 0; border: none; padding: 0;" data-i18n="edit_title">記載情報の編集</h3>
+                        <button onclick="setEditMode(false)" class="action-btn" style="width: auto; margin: 0; padding: 0.2rem 0.6rem; font-size: 0.8rem;" data-i18n="btn_view_mode">閲覧に戻る</button>
                     </div>
-                    <div id="drop-zone">
-                        <span data-i18n="drop_msg">標本画像を此処へ投下<br>或いはクリックして選択</span>
-                        <input type="file" id="input-image" accept="image/*" style="display: none;">
+
+                    <div class="form-group">
+                        <label data-i18n="label_ja">和名 (一般名)</label>
+                        <input type="text" id="input-name-ja">
                     </div>
+                    <div class="form-group">
+                        <label data-i18n="label_sci">学名</label>
+                        <input type="text" id="input-name-sci" style="font-style: italic; font-family: 'Times New Roman', serif;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label data-i18n="label_status">生存状況</label>
+                        <select id="input-status">
+                            <option value="normal" data-i18n="status_normal">現存 (指定なし)</option>
+                            <option value="endangered" data-i18n="status_endangered">絶滅危惧 (EN)</option>
+                            <option value="extinct" data-i18n="status_extinct">絶滅 (EX)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label data-i18n="label_desc">簡単な説明</label>
+                        <textarea id="input-desc" rows="3" placeholder="特徴や分布などを記載..."></textarea>
+                    </div>
+
+                    <div class="form-group discoverer-box">
+                        <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px dotted #ccc; padding-bottom: 0.3rem;" data-i18n="label_discoverer">発見者</div>
+                        <label data-i18n="label_discoverer_name">名前</label>
+                        <input type="text" id="input-discoverer-name" style="margin-bottom: 0.5rem;">
+                        <label data-i18n="label_discoverer_img">写真URL</label>
+                        <input type="text" id="input-discoverer-img" placeholder="http://..." style="font-family: sans-serif;">
+                    </div>
+
+                    <div style="margin-bottom: 1rem; margin-top: 1.5rem;">
+                        <button class="action-btn" onclick="updateNode()" data-i18n="btn_update">記載事項の更新</button>
+                        <button class="action-btn" onclick="addChildNode()" data-i18n="btn_add">＋ 派生群の追加</button>
+                        <button class="action-btn danger" onclick="deleteNode()" data-i18n="btn_del_node">ー 当該節の破棄</button>
+                    </div>
+
+                    <div style="border-top: 1px dotted var(--border-color); padding-top: 1.5rem; margin-bottom: 1rem;">
+                        <h3 data-i18n="poly_title">多系統群の所属</h3>
+                        <div id="node-groups-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;"></div>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+                            <select id="select-existing-group" style="flex-grow: 1; padding: 0.4rem; border: 1px solid var(--border-color); font-family: sans-serif;"></select>
+                            <button class="action-btn" id="btn-add-existing-group" style="width: auto; margin: 0; padding: 0.4rem 0.8rem;" onclick="addNodeToGroup()" data-i18n="btn_register">登録</button>
+                        </div>
+                        <div style="background: #fff; padding: 1rem; border: 1px solid var(--border-color);">
+                            <div style="font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--accent-color);" data-i18n="new_group_title">新規グループの定義</div>
+                            <input type="text" id="input-new-group-name" placeholder="名称 (例: A類)" style="width: 100%; padding: 0.4rem; margin-bottom: 0.5rem; border: 1px solid var(--border-color); font-family: sans-serif; box-sizing: border-box;">
+                            <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem;">
+                                <input type="color" id="input-new-group-color" value="#8a2be2" onchange="updateColorDisplay()" oninput="updateColorDisplay()" style="cursor: pointer;">
+                                <span id="color-bgr-display" class="color-display">[226, 43, 138]</span>
+                            </div>
+                            <button class="action-btn" style="margin:0; padding: 0.4rem;" onclick="createNewGroup()" data-i18n="btn_create_group">定義して追加</button>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px dotted var(--border-color); padding-top: 1.5rem;">
+                        <h3 data-i18n="image_title">標本図版の追加</h3>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                            <input type="text" id="input-image-url" placeholder="URL (http://...)" style="flex-grow: 1; padding: 0.4rem; border: 1px solid var(--border-color); font-family: sans-serif; font-size: 0.8rem;">
+                            <button class="action-btn" style="width: auto; margin: 0; padding: 0.4rem 0.8rem;" onclick="addImageUrl()" data-i18n="btn_register">登録</button>
+                        </div>
+                        <div id="drop-zone">
+                            <span data-i18n="drop_msg">標本画像を此処へ投下<br>或いはクリックして選択</span>
+                            <input type="file" id="input-image" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                    <div id="image-gallery" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 10px;"></div>
                 </div>
-                <div id="image-gallery" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 10px;"></div>
+                {% endif %}
+
             </div>
-            {% endif %}
-
-            {% if not can_edit %}
-            <div class="info-panel" id="viewer-panel" style="display: none; margin-top: 0;">
-                <h3 data-i18n="view_title">記載情報</h3>
-                
-                <div style="font-size: 0.8rem; color: var(--accent-color);" data-i18n="label_ja">和名 (一般名)</div>
-                <div class="view-text-val" id="view-name-ja" style="font-weight: bold; font-size: 1.2rem;"></div>
-
-                <div style="font-size: 0.8rem; color: var(--accent-color);" data-i18n="label_sci">学名</div>
-                <div class="view-text-val" id="view-name-sci" style="font-style: italic; font-family: 'Times New Roman', serif;"></div>
-
-                <div style="font-size: 0.8rem; color: var(--accent-color);" data-i18n="label_status">生存状況</div>
-                <div class="view-text-val" id="view-status"></div>
-
-                <div style="font-size: 0.8rem; color: var(--accent-color); margin-top: 1.5rem;" data-i18n="label_desc">簡単な説明</div>
-                <div class="view-text-val" id="view-desc" style="white-space: pre-wrap; line-height: 1.6;"></div>
-
-                <div style="font-size: 0.8rem; color: var(--accent-color); margin-top: 1.5rem;" data-i18n="label_discoverer">発見者</div>
-                <div class="view-text-val" style="display: flex; align-items: center; gap: 1rem; border: none; padding-bottom: 0;">
-                    <img id="view-discoverer-img" src="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 1px solid var(--border-color); display: none;">
-                    <span id="view-discoverer-name" style="font-weight: bold;"></span>
-                </div>
-
-                <div style="border-top: 1px dotted var(--border-color); padding-top: 1.5rem; margin-top: 1.5rem; margin-bottom: 1rem;">
-                    <h3 data-i18n="poly_title">多系統群の所属</h3>
-                    <div id="view-groups-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;"></div>
-                </div>
-
-                <div style="border-top: 1px dotted var(--border-color); padding-top: 1.5rem;">
-                    <h3 data-i18n="image_title_view">標本図版</h3>
-                    <div id="view-image-gallery" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 10px;"></div>
-                </div>
-            </div>
-            {% endif %}
 
             <div id="default-msg" style="margin-top: 1rem; color: #888; font-size: 0.9rem;" data-i18n="default_msg">
-                ※ 系統樹の節（ノード）を選択すると、詳細な記載・編集画面が展開されます。
+                ※ 系統樹の節（ノード）を選択すると、詳細情報が展開されます。
             </div>
         </div>
     </div>
@@ -227,22 +244,26 @@
         const zukanName = "{{ zukan_name }}";
         let treeData = {{ tree_data | tojson | safe }};
         const canEdit = {{ 'true' if can_edit else 'false' }};
+        
         let currentNode = null;
         let currentLinkStyle = "ortho"; 
+        let isEditMode = false; // モード管理フラグ
         
         const i18n = {
             ja: {
-                back_link: "← 書架へ帰還する", display_settings: "描画形式:", 
+                back_link: "← 書架へ帰還する", display_settings: "描画形式:", label_highlight: "強調:", val_none: "なし",
                 style_curve: "曲線", style_ortho: "直角", style_radial: "半円", mode_edit: "編集可能", mode_view: "閲覧専用",
-                scroll_help: "※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺)",
-                edit_title: "記載情報の編集", view_title: "記載情報", label_ja: "和名 (一般名)", label_sci: "学名",
+                scroll_help: "※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺), Wクリック(折畳)",
+                btn_edit: "編集", btn_view_mode: "閲覧に戻る",
+                edit_title: "記載情報の編集", label_ja: "和名 (一般名)", label_sci: "学名",
                 label_status: "生存状況", status_normal: "現存 (指定なし)", status_endangered: "絶滅危惧 (EN)", status_extinct: "絶滅 (EX)",
-                label_desc: "簡単な説明", label_discoverer: "発見者", label_discoverer_name: "名前", label_discoverer_img: "写真URL",
+                label_desc: "簡単な説明", label_discoverer: "発見者:", label_discoverer_name: "名前", label_discoverer_img: "写真URL",
                 btn_update: "記載事項の更新", btn_add: "＋ 派生群の追加", btn_del_node: "ー 当該節の破棄",
+                btn_collapse: "派生群を折り畳む [-]", btn_expand: "派生群を展開する [+]",
                 poly_title: "多系統群の所属", new_group_title: "新規グループの定義", btn_create_group: "定義して追加",
                 msg_no_groups: "未所属", placeholder_group: "名称 (例: A類)",
-                image_title: "標本図版の追加", image_title_view: "標本図版", btn_register: "登録", drop_msg: "標本画像を此処へ投下<br>或いはクリックして選択",
-                default_msg: "※ 系統樹の節（ノード）を選択すると、詳細な記載画面が展開されます。",
+                image_title: "標本図版の追加", btn_register: "登録", drop_msg: "標本画像を此処へ投下<br>或いはクリックして選択",
+                default_msg: "※ 系統樹の節（ノード）を選択すると、詳細情報が展開されます。",
                 msg_save: "記録を保存いたしました。", msg_err_save: "保存に失敗いたしました。",
                 msg_root_del: "根源となる祖先ノードは破棄できません。", confirm_del_node: "「{0}」に関する一切の記録を破棄します。よろしいですか？",
                 msg_img_req: "画像のURLを入力してください。", msg_img_added: "図版を登録いたしました。",
@@ -250,17 +271,19 @@
                 new_node_name: "新分類群"
             },
             en: {
-                back_link: "← Return to Library", display_settings: "Layout:", 
+                back_link: "← Return to Library", display_settings: "Layout:", label_highlight: "Highlight:", val_none: "None",
                 style_curve: "Curved", style_ortho: "Orthogonal", style_radial: "Radial", mode_edit: "Edit Mode", mode_view: "View Only",
-                scroll_help: "Nav: Scroll (Y-axis), Shift+Scroll (X-axis), Ctrl+Scroll (Zoom)",
-                edit_title: "Edit Node Record", view_title: "Node Record", label_ja: "Common Name", label_sci: "Scientific Name",
+                scroll_help: "Nav: Scroll (Y), Shift+Scroll (X), Ctrl+Scroll (Zoom), DblClick(Collapse)",
+                btn_edit: "Edit", btn_view_mode: "View Mode",
+                edit_title: "Edit Node Record", label_ja: "Common Name", label_sci: "Scientific Name",
                 label_status: "Status", status_normal: "Extant (Normal)", status_endangered: "Endangered (EN)", status_extinct: "Extinct (EX)",
-                label_desc: "Description", label_discoverer: "Discoverer", label_discoverer_name: "Name", label_discoverer_img: "Photo URL",
+                label_desc: "Description", label_discoverer: "Discoverer:", label_discoverer_name: "Name", label_discoverer_img: "Photo URL",
                 btn_update: "Update Record", btn_add: "+ Add Clade", btn_del_node: "- Discard Node",
+                btn_collapse: "Collapse Clade [-]", btn_expand: "Expand Clade [+]",
                 poly_title: "Polyphyletic Groups", new_group_title: "Define New Group", btn_create_group: "Define & Add",
                 msg_no_groups: "None", placeholder_group: "Name (e.g., Group A)",
-                image_title: "Add Specimen Plate", image_title_view: "Specimen Plates", btn_register: "Register", drop_msg: "Drop specimen image here<br>or click to select",
-                default_msg: "* Select a node on the cladogram to expand the panel.",
+                image_title: "Add Specimen Plate", btn_register: "Register", drop_msg: "Drop specimen image here<br>or click to select",
+                default_msg: "* Select a node on the cladogram to expand details.",
                 msg_save: "Record saved successfully.", msg_err_save: "Failed to save the record.",
                 msg_root_del: "The root ancestor node cannot be discarded.", confirm_del_node: "Discard all records for '{0}'?",
                 msg_img_req: "Please enter an image URL.", msg_img_added: "Plate registered.",
@@ -286,11 +309,27 @@
                 document.getElementById("input-desc").placeholder = lang === 'ja' ? "特徴や分布などを記載..." : "Enter description...";
             }
             
+            updateHighlightOptions();
             if (currentNode) {
-                renderImagesBase();
-                renderGroupsUIBase();
+                renderPanels();
             }
             renderTree();
+        }
+
+        function updateHighlightOptions() {
+            const select = document.getElementById("select-highlight");
+            const currentVal = select.value;
+            select.innerHTML = `<option value="" data-i18n="val_none">${i18n[currentLang].val_none}</option>`;
+            
+            if (treeData.polyphyletic_groups) {
+                treeData.polyphyletic_groups.forEach(g => {
+                    const opt = document.createElement("option");
+                    opt.value = g.id;
+                    opt.textContent = g.name;
+                    select.appendChild(opt);
+                });
+            }
+            select.value = currentVal; 
         }
 
         function changeLinkStyle() {
@@ -307,8 +346,118 @@
         }
 
         // ==========================================
-        // 編集系関数
+        // パネル切り替え & レンダリング制御
         // ==========================================
+        function setEditMode(mode) {
+            isEditMode = mode;
+            renderPanels();
+        }
+
+        function renderPanels() {
+            if (!currentNode) return;
+            
+            if (canEdit && isEditMode) {
+                document.getElementById("viewer-panel").style.display = "none";
+                document.getElementById("editor-panel").style.display = "block";
+                
+                document.getElementById("input-name-ja").value = currentNode.data.name_ja || "";
+                document.getElementById("input-name-sci").value = currentNode.data.name_sci || "";
+                document.getElementById("input-status").value = currentNode.data.status || "normal";
+                document.getElementById("input-desc").value = currentNode.data.description || "";
+                document.getElementById("input-discoverer-name").value = currentNode.data.discoverer_name || "";
+                document.getElementById("input-discoverer-img").value = currentNode.data.discoverer_image || "";
+                
+            } else {
+                if (canEdit) document.getElementById("editor-panel").style.display = "none";
+                document.getElementById("viewer-panel").style.display = "block";
+                
+                document.getElementById("view-name-ja").innerText = currentNode.data.name_ja || "---";
+                document.getElementById("view-name-sci").innerText = currentNode.data.name_sci || "";
+                document.getElementById("view-desc").innerText = currentNode.data.description || "";
+                
+                // ステータスバッジ
+                const statusBadge = document.getElementById("view-status-badge");
+                if(currentNode.data.status === "endangered") {
+                    statusBadge.innerText = "EN " + i18n[currentLang].status_endangered;
+                    statusBadge.style.color = "#dc3545"; statusBadge.style.borderColor = "#dc3545"; statusBadge.style.backgroundColor = "#fff";
+                } else if(currentNode.data.status === "extinct") {
+                    statusBadge.innerText = "† " + i18n[currentLang].status_extinct;
+                    statusBadge.style.color = "#fff"; statusBadge.style.borderColor = "#333"; statusBadge.style.backgroundColor = "#333";
+                } else {
+                    statusBadge.innerText = "LC " + i18n[currentLang].status_normal;
+                    statusBadge.style.color = "#28a745"; statusBadge.style.borderColor = "#28a745"; statusBadge.style.backgroundColor = "#fff";
+                }
+
+                // 発見者
+                const discName = currentNode.data.discoverer_name || "";
+                const discImgUrl = currentNode.data.discoverer_image || "";
+                const discContainer = document.getElementById("view-discoverer-container");
+                if (discName || discImgUrl) {
+                    discContainer.style.display = "flex";
+                    document.getElementById("view-discoverer-name").innerText = discName || "---";
+                    const imgEl = document.getElementById("view-discoverer-img");
+                    if (discImgUrl) { imgEl.src = discImgUrl; imgEl.style.display = "block"; } 
+                    else { imgEl.style.display = "none"; }
+                } else {
+                    discContainer.style.display = "none";
+                }
+            }
+            
+            renderImagesBase();
+            renderGroupsUIBase();
+            updateCollapseButton();
+        }
+
+        // ==========================================
+        // 伝播 & 編集ロジック
+        // ==========================================
+        function addGroupPropagate(nodeData, gId) {
+            function addDown(n) {
+                if (!n.groups) n.groups = [];
+                if (!n.groups.includes(gId)) n.groups.push(gId);
+                if (n.children) n.children.forEach(addDown);
+            }
+            addDown(nodeData);
+
+            const root = d3.hierarchy(treeData, d => d.children);
+            let targetNode = null;
+            root.each(d => { if (d.data.id === nodeData.id) targetNode = d; });
+            
+            if (targetNode) {
+                let curr = targetNode.parent;
+                while (curr) {
+                    const allChildrenHaveIt = curr.children.every(c => c.data.groups && c.data.groups.includes(gId));
+                    if (allChildrenHaveIt) {
+                        if (!curr.data.groups) curr.data.groups = [];
+                        if (!curr.data.groups.includes(gId)) curr.data.groups.push(gId);
+                        curr = curr.parent;
+                    } else break;
+                }
+            }
+        }
+
+        function removeGroupPropagate(nodeData, gId) {
+            function removeDown(n) {
+                if (n.groups) n.groups = n.groups.filter(id => id !== gId);
+                if (n.children) n.children.forEach(removeDown);
+            }
+            removeDown(nodeData);
+
+            const root = d3.hierarchy(treeData, d => d.children);
+            let targetNode = null;
+            root.each(d => { if (d.data.id === nodeData.id) targetNode = d; });
+            
+            if (targetNode) {
+                let curr = targetNode.parent;
+                while (curr) {
+                    if (curr.data.groups && curr.data.groups.includes(gId)) {
+                        curr.data.groups = curr.data.groups.filter(id => id !== gId);
+                        curr = curr.parent;
+                    } else break;
+                }
+            }
+        }
+
         function updateNode() {
             if (!canEdit || !currentNode) return;
             currentNode.data.name_ja = document.getElementById("input-name-ja").value;
@@ -317,7 +466,10 @@
             currentNode.data.description = document.getElementById("input-desc").value;
             currentNode.data.discoverer_name = document.getElementById("input-discoverer-name").value;
             currentNode.data.discoverer_image = document.getElementById("input-discoverer-img").value;
-            saveToServer(); renderTree();
+            saveToServer(); 
+            isEditMode = false; // 更新後は閲覧モードに戻る
+            renderPanels(); 
+            renderTree();
         }
 
         function addChildNode() {
@@ -329,7 +481,8 @@
             };
             if (!currentNode.data.children) currentNode.data.children = [];
             currentNode.data.children.push(newNode);
-            saveToServer(); renderTree();
+            currentNode.data._collapsed = false;
+            saveToServer(); renderTree(); updateCollapseButton();
         }
 
         function deleteNode() {
@@ -342,7 +495,7 @@
             if (index > -1) parentData.children.splice(index, 1);
 
             currentNode = null;
-            document.getElementById("editor-panel").style.display = "none";
+            document.getElementById("node-panel-container").style.display = "none";
             document.getElementById("default-msg").style.display = "block";
             saveToServer(); renderTree();
         }
@@ -368,11 +521,10 @@
             const newGroup = { id: "group_" + Date.now(), name: name, color: color };
             treeData.polyphyletic_groups.push(newGroup);
             
-            if (!currentNode.data.groups) currentNode.data.groups = [];
-            currentNode.data.groups.push(newGroup.id);
+            addGroupPropagate(currentNode.data, newGroup.id);
             
             nameInput.value = "";
-            saveToServer(); renderGroupsUIBase(); renderTree();
+            saveToServer(); updateHighlightOptions(); renderGroupsUIBase(); renderTree();
         }
 
         function addNodeToGroup() {
@@ -381,15 +533,46 @@
             const gId = select.value;
             if (!gId || gId === "---") return;
             
-            if (!currentNode.data.groups) currentNode.data.groups = [];
-            currentNode.data.groups.push(gId);
+            addGroupPropagate(currentNode.data, gId);
             saveToServer(); renderGroupsUIBase(); renderTree();
         }
 
         function removeNodeFromGroup(gId) {
             if (!canEdit || !currentNode || !currentNode.data.groups) return;
-            currentNode.data.groups = currentNode.data.groups.filter(id => id !== gId);
+            removeGroupPropagate(currentNode.data, gId);
             saveToServer(); renderGroupsUIBase(); renderTree();
+        }
+
+        function toggleCollapse() {
+            if (!currentNode) return;
+            const targetId = currentNode.data.id;
+            currentNode.data._collapsed = !currentNode.data._collapsed;
+            
+            if (canEdit) saveToServer(true);
+            renderTree();
+            
+            const svgNode = d3.select("#tree-container").selectAll(".node").filter(nd => nd.data.id === targetId).node();
+            if (svgNode) svgNode.dispatchEvent(new MouseEvent('click'));
+        }
+
+        function updateCollapseButton() {
+            if (!currentNode) return;
+            const hasChildren = currentNode.data.children && currentNode.data.children.length > 0;
+            const targetBoxId = isEditMode ? "editor-collapse-box" : "viewer-collapse-box";
+            const targetBtnId = isEditMode ? "btn-editor-collapse" : "btn-viewer-collapse";
+            
+            // 別のモードのボックスは隠す
+            document.getElementById(isEditMode ? "viewer-collapse-box" : "editor-collapse-box").style.display = "none";
+
+            const box = document.getElementById(targetBoxId);
+            const btn = document.getElementById(targetBtnId);
+            
+            if (hasChildren) {
+                box.style.display = "block";
+                btn.innerText = currentNode.data._collapsed ? i18n[currentLang].btn_expand : i18n[currentLang].btn_collapse;
+            } else {
+                box.style.display = "none";
+            }
         }
 
         function addImageUrl() {
@@ -438,11 +621,10 @@
             saveToServer(); renderImagesBase(); renderTree();
         }
 
-        // ==========================================
-        // UI レンダリング制御
-        // ==========================================
         function renderGroupsUIBase() {
             const nodeGroups = currentNode.data.groups || [];
+            
+            // 編集モード用UIの更新
             if (canEdit) {
                 const container = document.getElementById("node-groups-container");
                 const select = document.getElementById("select-existing-group");
@@ -466,40 +648,46 @@
                 } else {
                     const opt = document.createElement("option"); opt.textContent = "---"; select.appendChild(opt); addBtn.disabled = true;
                 }
-            } else {
-                const container = document.getElementById("view-groups-container");
-                container.innerHTML = "";
-                if (nodeGroups.length === 0) container.innerHTML = `<span style="font-size:0.85rem; color:#888; font-style:italic;">${i18n[currentLang].msg_no_groups}</span>`;
-                nodeGroups.forEach(gId => {
-                    const gInfo = (treeData.polyphyletic_groups || []).find(g => g.id === gId);
-                    if (!gInfo) return;
-                    const badge = document.createElement("div"); badge.className = "poly-badge";
-                    badge.innerHTML = `<div class="color-dot" style="background-color: ${gInfo.color};"></div><span>${gInfo.name}</span>`; 
-                    container.appendChild(badge);
-                });
             }
+
+            // 閲覧モード用UIの更新 (常に更新する)
+            const viewContainer = document.getElementById("view-groups-container");
+            viewContainer.innerHTML = "";
+            nodeGroups.forEach(gId => {
+                const gInfo = (treeData.polyphyletic_groups || []).find(g => g.id === gId);
+                if (!gInfo) return;
+                const badge = document.createElement("div"); badge.className = "poly-badge-small";
+                badge.innerHTML = `<div class="color-dot" style="background-color: ${gInfo.color}; width:8px; height:8px;"></div><span>${gInfo.name}</span>`; 
+                viewContainer.appendChild(badge);
+            });
         }
 
         function renderImagesBase() {
-            const targetId = canEdit ? "image-gallery" : "view-image-gallery";
-            const gallery = document.getElementById(targetId);
-            gallery.innerHTML = "";
-            
-            if (currentNode && currentNode.data.images && currentNode.data.images.length > 0) {
-                currentNode.data.images.forEach((url, index) => {
-                    const container = document.createElement("div"); container.className = "thumbnail-container";
-                    const img = document.createElement("img"); img.src = url; img.className = "thumbnail";
-                    img.onerror = function() { this.src = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2280%22%20height%3D%2280%22%3E%3Crect%20width%3D%2280%22%20height%3D%2280%22%20fill%3D%22%23fafafa%22%2F%3E%3Ctext%20x%3D%2240%22%20y%3D%2245%22%20font-size%3D%2212%22%20text-anchor%3D%22middle%22%20fill%3D%22%23999%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E"; };
-                    container.appendChild(img);
-                    
-                    if (canEdit) {
+            if (canEdit && isEditMode) {
+                const gallery = document.getElementById("image-gallery");
+                gallery.innerHTML = "";
+                if (currentNode && currentNode.data.images && currentNode.data.images.length > 0) {
+                    currentNode.data.images.forEach((url, index) => {
+                        const container = document.createElement("div"); container.className = "thumbnail-container";
+                        const img = document.createElement("img"); img.src = url; img.className = "thumbnail";
+                        img.onerror = function() { this.src = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2280%22%20height%3D%2280%22%3E%3Crect%20width%3D%2280%22%20height%3D%2280%22%20fill%3D%22%23fafafa%22%2F%3E%3Ctext%20x%3D%2240%22%20y%3D%2245%22%20font-size%3D%2212%22%20text-anchor%3D%22middle%22%20fill%3D%22%23999%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E"; };
+                        container.appendChild(img);
                         const deleteBtn = document.createElement("button"); deleteBtn.innerText = "×"; deleteBtn.className = "btn-delete-img"; deleteBtn.onclick = () => deleteImage(index);
-                        container.appendChild(deleteBtn);
-                    }
-                    gallery.appendChild(container);
-                });
+                        container.appendChild(deleteBtn); gallery.appendChild(container);
+                    });
+                }
             } else {
-                gallery.innerHTML = `<span style="color:#aaa; font-size:0.85rem; font-style: italic;">${i18n[currentLang].msg_no_img}</span>`;
+                const gallery = document.getElementById("view-image-gallery");
+                gallery.innerHTML = "";
+                if (currentNode && currentNode.data.images && currentNode.data.images.length > 0) {
+                    currentNode.data.images.forEach((url, index) => {
+                        const img = document.createElement("img"); 
+                        img.src = url; 
+                        img.className = index === 0 ? "view-img-hero" : "view-img-thumb"; // 1枚目のみ大きく
+                        img.onerror = function() { this.src = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2280%22%20height%3D%2280%22%3E%3Crect%20width%3D%2280%22%20height%3D%2280%22%20fill%3D%22%23fafafa%22%2F%3E%3Ctext%20x%3D%2240%22%20y%3D%2245%22%20font-size%3D%2212%22%20text-anchor%3D%22middle%22%20fill%3D%22%23999%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E"; };
+                        gallery.appendChild(img);
+                    });
+                }
             }
         }
 
@@ -536,7 +724,8 @@
             });
 
             const isRadial = currentLinkStyle === "radial";
-            const root = d3.hierarchy(treeData, d => d.children);
+            
+            const root = d3.hierarchy(treeData, d => d._collapsed ? null : d.children);
 
             if (isRadial) {
                 const maxDepth = d3.max(root.descendants(), d => d.depth) || 1;
@@ -562,7 +751,14 @@
                 }
             });
 
+            const highlightId = document.getElementById("select-highlight").value;
+            const isHighlighted = d => highlightId === "" || (d.data.groups && d.data.groups.includes(highlightId));
+
             g.selectAll(".link").data(root.links()).enter().append("path").attr("class", "link")
+                .style("opacity", d => {
+                    if (!highlightId) return 1;
+                    return (isHighlighted(d.source) && isHighlighted(d.target)) ? 1 : 0.15;
+                })
                 .attr("d", d => {
                     if (isRadial) {
                         const r1 = d.source.y, r2 = d.target.y;
@@ -579,15 +775,49 @@
                 });
 
             const node = g.selectAll(".node").data(root.descendants()).enter().append("g")
-                .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
+                .attr("class", d => "node" + (d.data.children && d.data.children.length > 0 ? " node--internal" : " node--leaf"))
                 .attr("transform", d => `translate(${d.cx},${d.cy})`)
-                .on("click", clickNode);
+                .style("opacity", d => {
+                    if (!highlightId) return 1;
+                    return isHighlighted(d) ? 1 : 0.15;
+                })
+                .on("click", clickNode)
+                .on("dblclick", function(event, d) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    if (d.data.children && d.data.children.length > 0) {
+                        const targetId = d.data.id;
+                        d.data._collapsed = !d.data._collapsed;
+                        if (canEdit) saveToServer(true);
+                        renderTree();
+                        const svgNode = d3.select("#tree-container").selectAll(".node").filter(nd => nd.data.id === targetId).node();
+                        if (svgNode) svgNode.dispatchEvent(new MouseEvent('click'));
+                    }
+                });
 
-            node.append("circle").attr("r", 5);
+            node.each(function(d) {
+                if (highlightId && isHighlighted(d)) {
+                    const gInfo = treeData.polyphyletic_groups.find(g => g.id === highlightId);
+                    if (gInfo) {
+                        d3.select(this).insert("circle", ":first-child")
+                          .attr("r", 40).style("fill", gInfo.color).style("opacity", 0.25).style("pointer-events", "none");
+                    }
+                }
+            });
+
+            node.append("circle")
+                .attr("r", d => d.data._collapsed ? 6 : 5)
+                .style("fill", d => d.data._collapsed ? "var(--text-color)" : null);
+
+            node.filter(d => d.data._collapsed).append("path")
+                .attr("d", "M-3,0 H3 M0,-3 V3")
+                .style("stroke", "#fff")
+                .style("stroke-width", "1.5px")
+                .style("pointer-events", "none");
 
             const imgSize = 56;
             const imgOffset = imgSize / 2; 
-            const getIsLeft = (d) => isRadial ? (d.angle * 180 / Math.PI) < 0 : !!d.children;
+            const getIsLeft = (d) => isRadial ? (d.angle * 180 / Math.PI) < 0 : (d.data.children && d.data.children.length > 0);
             const getXOffset = (d) => {
                 const hasImg = d.data.images && d.data.images.length > 0;
                 const offset = 10 + (hasImg ? imgSize + 8 : 0);
@@ -670,46 +900,31 @@
 
             function clickNode(event, d) {
                 currentNode = d;
+                isEditMode = false; // クリック時は常に閲覧モードからスタート
                 document.getElementById("default-msg").style.display = "none";
+                document.getElementById("node-panel-container").style.display = "block";
                 
-                if (canEdit) {
-                    document.getElementById("editor-panel").style.display = "block";
-                    document.getElementById("input-name-ja").value = d.data.name_ja || "";
-                    document.getElementById("input-name-sci").value = d.data.name_sci || "";
-                    document.getElementById("input-status").value = d.data.status || "normal";
-                    document.getElementById("input-desc").value = d.data.description || "";
-                    document.getElementById("input-discoverer-name").value = d.data.discoverer_name || "";
-                    document.getElementById("input-discoverer-img").value = d.data.discoverer_image || "";
-                } else {
-                    document.getElementById("viewer-panel").style.display = "block";
-                    document.getElementById("view-name-ja").innerText = d.data.name_ja || "---";
-                    document.getElementById("view-name-sci").innerText = d.data.name_sci || "---";
-                    document.getElementById("view-desc").innerText = d.data.description || "---";
-                    
-                    let statusText = i18n[currentLang].status_normal;
-                    if(d.data.status === "endangered") statusText = i18n[currentLang].status_endangered;
-                    if(d.data.status === "extinct") statusText = i18n[currentLang].status_extinct;
-                    document.getElementById("view-status").innerText = statusText;
+                renderPanels();
 
-                    document.getElementById("view-discoverer-name").innerText = d.data.discoverer_name || "---";
-                    const discImg = document.getElementById("view-discoverer-img");
-                    if (d.data.discoverer_image) {
-                        discImg.src = d.data.discoverer_image;
-                        discImg.style.display = "block";
-                    } else {
-                        discImg.style.display = "none";
-                    }
-                }
-                
-                renderImagesBase();
-                renderGroupsUIBase();
+                g.selectAll(".node > circle")
+                  .style("stroke", "#222")
+                  .style("stroke-width", "1.5px")
+                  .style("fill", function(n){ 
+                      if(n.data._collapsed) return "var(--text-color)";
+                      return (n.data.children && n.data.children.length > 0) ? "#222" : "#fff"; 
+                  });
 
-                g.selectAll("circle").style("stroke", "#222").style("stroke-width", "1.5px").style("fill", function(n){ return n.children ? "#222" : "#fff"; });
-                d3.select(this).select("circle").style("stroke", "#8a2be2").style("stroke-width", "3px").style("fill", "#fff");
+                d3.select(this).select("circle")
+                  .style("stroke", "#8a2be2")
+                  .style("stroke-width", "3px")
+                  .style("fill", function(n){ 
+                      return n.data._collapsed ? "var(--text-color)" : "#fff"; 
+                  });
             }
         }
 
         if(canEdit) updateColorDisplay();
+        updateHighlightOptions();
         setLang(currentLang);
     </script>
 </body>

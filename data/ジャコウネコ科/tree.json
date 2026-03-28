@@ -1,0 +1,256 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [],
+              "id": "arctictis_binturong",
+              "images": [
+                "https://upload.wikimedia.org/wikipedia/commons/4/40/Arctictis_binturong_13.jpg"
+              ],
+              "name_ja": "ビントロング",
+              "name_sci": "Arctictis binturong"
+            }
+          ],
+          "id": "arctictis",
+          "images": [],
+          "name_ja": "ビントロング属",
+          "name_sci": "Arctictis"
+        },
+        {
+          "children": [
+            {
+              "children": [],
+              "id": "paguma_larvata",
+              "images": [],
+              "name_ja": "ハクビシン",
+              "name_sci": "Paguma larvata"
+            }
+          ],
+          "id": "paguma",
+          "images": [],
+          "name_ja": "タイワンジャコウネコ属",
+          "name_sci": "Paguma"
+        },
+        {
+          "children": [
+            {
+              "children": [],
+              "groups": [
+                "group_1774661540432"
+              ],
+              "id": "paradoxurus_hermaphroditus",
+              "images": [
+                "https://upload.wikimedia.org/wikipedia/commons/d/d0/Paradox_hermaph_060924_ltn.jpg"
+              ],
+              "name_ja": "アジアパームシベット",
+              "name_sci": "Paradoxurus hermaphroditus"
+            }
+          ],
+          "id": "paradoxurus",
+          "images": [],
+          "name_ja": "パームシベット属",
+          "name_sci": "Paradoxurus"
+        }
+      ],
+      "id": "paradoxurinae",
+      "images": [],
+      "name_ja": "オナガジャコウネコ亜科",
+      "name_sci": "Paradoxurinae"
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [],
+              "id": "civettictis_civetta",
+              "images": [
+                "https://upload.wikimedia.org/wikipedia/commons/b/bf/African_civet.jpg"
+              ],
+              "name_ja": "アフリカジャコウネコ",
+              "name_sci": "Civettictis civetta"
+            }
+          ],
+          "id": "civettictis",
+          "images": [],
+          "name_ja": "アフリカジャコウネコ属",
+          "name_sci": "Civettictis"
+        },
+        {
+          "children": [
+            {
+              "children": [],
+              "groups": [
+                "group_1774661540432"
+              ],
+              "id": "viverra_zibetha",
+              "images": [
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Large_Indian_Civet%2C_Viverra_zibetha_in_Kaeng_Krachan_national_park.jpg/500px-Large_Indian_Civet%2C_Viverra_zibetha_in_Kaeng_Krachan_national_park.jpg"
+              ],
+              "name_ja": "オオジャコウネコ",
+              "name_sci": "Viverra zibetha"
+            }
+          ],
+          "id": "viverra",
+          "images": [],
+          "name_ja": "ジャコウネコ属",
+          "name_sci": "Viverra"
+        },
+        {
+          "children": [
+            {
+              "children": [],
+              "id": "viverricula_indica",
+              "images": [],
+              "name_ja": "インドジャコウネコ",
+              "name_sci": "Viverricula indica"
+            }
+          ],
+          "id": "viverricula",
+          "images": [],
+          "name_ja": "インドジャコウネコ属",
+          "name_sci": "Viverricula"
+        }
+      ],
+      "id": "viverrinae",
+      "images": [],
+      "name_ja": "ジャコウネコ亜科",
+      "name_sci": "Viverrinae"
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [],
+              "id": "genetta_genetta",
+              "images": [
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Genet_kat.jpg/500px-Genet_kat.jpg"
+              ],
+              "name_ja": "ヨーロッパジェネット",
+              "name_sci": "Genetta genetta"
+            }
+          ],
+          "id": "genetta",
+          "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/9/95/Genetta_angolensis.jpg"
+          ],
+          "name_ja": "ジェネット属",
+          "name_sci": "Genetta",
+          "status": "normal"
+        },
+        {
+          "children": [
+            {
+              "children": [],
+              "id": "poiana_richardsonii",
+              "images": [],
+              "name_ja": "アフリカリンサン",
+              "name_sci": "Poiana richardsonii"
+            }
+          ],
+          "id": "poiana",
+          "images": [],
+          "name_ja": "アフリカリンサン属",
+          "name_sci": "Poiana"
+        }
+      ],
+      "id": "genettinae",
+      "images": [],
+      "name_ja": "ジェネット亜科",
+      "name_sci": "Genettinae"
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [],
+              "groups": [
+                "group_1774661558080"
+              ],
+              "id": "chrotogale_owstoni",
+              "images": [],
+              "name_ja": "シロアゴジャコウネコ",
+              "name_sci": "Chrotogale owstoni"
+            }
+          ],
+          "id": "chrotogale",
+          "images": [],
+          "name_ja": "シロアゴジャコウネコ属",
+          "name_sci": "Chrotogale"
+        },
+        {
+          "children": [
+            {
+              "children": [],
+              "id": "cynogale_bennettii",
+              "images": [
+                "https://upload.wikimedia.org/wikipedia/commons/a/ae/Mampalon_%28Cynogale_Bennettii%29.png"
+              ],
+              "name_ja": "カワジャコウネコ",
+              "name_sci": "Cynogale bennettii"
+            }
+          ],
+          "id": "cynogale",
+          "images": [],
+          "name_ja": "カワジャコウネコ属",
+          "name_sci": "Cynogale"
+        }
+      ],
+      "id": "hemigalinae",
+      "images": [],
+      "name_ja": "ヘミガルス亜科",
+      "name_sci": "Hemigalinae"
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [],
+              "id": "prionodon_linsang",
+              "images": [],
+              "name_ja": "バンテンリンサン",
+              "name_sci": "Prionodon linsang"
+            },
+            {
+              "children": [],
+              "id": "prionodon_pardicolor",
+              "images": [],
+              "name_ja": "スポットリンサン",
+              "name_sci": "Prionodon pardicolor"
+            }
+          ],
+          "id": "prionodon",
+          "images": [],
+          "name_ja": "リンサン属",
+          "name_sci": "Prionodon"
+        }
+      ],
+      "id": "prionodontinae",
+      "images": [],
+      "name_ja": "リンサン亜科",
+      "name_sci": "Prionodontinae"
+    }
+  ],
+  "id": "root",
+  "images": [],
+  "name_ja": "ジャコウネコ科",
+  "name_sci": "Viverridae",
+  "polyphyletic_groups": [
+    {
+      "color": "#8a2be2",
+      "id": "group_1774661540432",
+      "name": "あ"
+    },
+    {
+      "color": "#38e22c",
+      "id": "group_1774661558080",
+      "name": "ｎ"
+    }
+  ]
+}
