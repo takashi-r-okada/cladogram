@@ -4,48 +4,34 @@
     <meta charset="UTF-8">
     <title>分岐図鑑書架 / Cladogram Library</title>
     <style>
-        /* 百科事典風の格調高いスタイル */
-        :root {
-            --bg-color: #fcfcfc;
-            --text-color: #222;
-            --border-color: #ddd;
-            --accent-color: #555;
-        }
-        body { 
-            font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP", "Times New Roman", serif; 
-            margin: 0; padding: 4rem 2rem; 
-            background-color: var(--bg-color); 
-            color: var(--text-color);
-            line-height: 1.6;
-        }
+        :root { --bg-color: #fcfcfc; --text-color: #222; --border-color: #ddd; --accent-color: #555; }
+        body { font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP", "Times New Roman", serif; margin: 0; padding: 4rem 2rem; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6;}
         .container { max-width: 850px; margin: 0 auto; background: #fff; padding: 3rem; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         
-        /* ヘッダーと切り替えボタン */
         .header-top { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--text-color); padding-bottom: 1rem; margin-bottom: 2rem; }
         h1 { font-size: 2rem; margin: 0; font-weight: normal; letter-spacing: 2px; }
-        
-        .lang-switch button {
-            background: none; border: none; font-family: inherit; font-size: 1rem; cursor: pointer; color: #888; padding: 0 0.5rem;
-        }
+        .lang-switch button { background: none; border: none; font-family: inherit; font-size: 1rem; cursor: pointer; color: #888; padding: 0 0.5rem; }
         .lang-switch button.active { color: var(--text-color); font-weight: bold; text-decoration: underline; }
+        
+        .user-nav { font-size: 0.9rem; text-align: right; margin-bottom: 2rem; }
+        .user-nav a { color: var(--text-color); text-decoration: none; margin-left: 1rem; border: 1px solid var(--border-color); padding: 0.2rem 0.8rem; border-radius: 20px;}
+        .user-nav a:hover { background: var(--text-color); color: white; }
 
-        h2 { font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; font-weight: normal; margin-top: 2.5rem;}
+        h2 { font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; font-weight: normal; margin-top: 1rem;}
         
         .zukan-list { list-style: none; padding: 0; margin: 0; }
         .zukan-list li { padding: 1rem 0; border-bottom: 1px dashed var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .zukan-list a { text-decoration: none; color: var(--text-color); font-size: 1.2rem; flex-grow: 1; transition: opacity 0.2s; }
+        .zukan-list a { text-decoration: none; color: var(--text-color); font-size: 1.2rem; flex-grow: 1; transition: 0.2s; }
         .zukan-list a:hover { opacity: 0.6; }
         
-        /* クラシックなボタンデザイン */
-        .actions button, .create-form button { 
-            margin-left: 0.5rem; padding: 0.3rem 0.8rem; border: 1px solid var(--text-color); background: transparent; 
-            color: var(--text-color); font-family: inherit; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; 
-        }
+        .role-badge { font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 4px; border: 1px solid #ccc; margin-left: 0.5rem; font-family: sans-serif; color: #666; }
+        .role-owner { border-color: #8a2be2; color: #8a2be2; }
+
+        .actions button, .create-form button { margin-left: 0.5rem; padding: 0.3rem 0.8rem; border: 1px solid var(--text-color); background: transparent; color: var(--text-color); font-family: inherit; font-size: 0.9rem; cursor: pointer; transition: 0.2s; }
         .actions button:hover, .create-form button:hover { background: var(--text-color); color: #fff; }
         
         .create-form { margin-top: 3rem; }
         .create-form input { padding: 0.5rem; font-size: 1rem; font-family: inherit; border: 1px solid var(--border-color); width: 60%; background: #fafafa; }
-        .create-form input:focus { outline: none; border-color: var(--text-color); }
     </style>
 </head>
 <body>
@@ -57,23 +43,46 @@
                 <button id="btn-ja" onclick="setLang('ja')" class="active">JA</button>
             </div>
         </div>
+
+        <div class="user-nav">
+            {% if current_user %}
+                <span data-i18n="logged_in_as">利用者:</span> <strong>{{ current_user }}</strong>
+                <a href="/logout" data-i18n="btn_logout">退出</a>
+            {% else %}
+                <span data-i18n="guest_msg">閲覧者として入室中</span>
+                <a href="/login" data-i18n="btn_login">認証 (ログイン)</a>
+            {% endif %}
+        </div>
         
         <h2 data-i18n="list_title">収蔵目録</h2>
         <ul class="zukan-list">
             {% for zukan in zukans %}
                 <li>
-                    <a href="/editor/{{ zukan }}">✤ {{ zukan }}</a>
+                    <a href="/editor/{{ zukan.name }}">✤ {{ zukan.name }}
+                        {% if zukan.is_owner %}<span class="role-badge role-owner" data-i18n="role_owner">編纂主</span>
+                        {% elif zukan.can_edit %}<span class="role-badge" data-i18n="role_editor">編集者</span>{% endif %}
+                    </a>
                     <div class="actions">
-                        <button onclick="renameZukan('{{ zukan }}')" data-i18n="btn_rename">改名</button>
-                        <button onclick="duplicateZukan('{{ zukan }}')" data-i18n="btn_duplicate">複製</button>
-                        <button onclick="deleteZukan('{{ zukan }}')" data-i18n="btn_delete">破棄</button>
+                        {% if current_user %}
+                            <button onclick="duplicateZukan('{{ zukan.name }}')" data-i18n="btn_duplicate">複製</button>
+                        {% endif %}
+                        
+                        {% if zukan.can_edit %}
+                            <button onclick="addEditor('{{ zukan.name }}')" data-i18n="btn_add_editor">編集者追加</button>
+                        {% endif %}
+
+                        {% if zukan.is_owner %}
+                            <button onclick="renameZukan('{{ zukan.name }}')" data-i18n="btn_rename">改名</button>
+                            <button onclick="deleteZukan('{{ zukan.name }}')" data-i18n="btn_delete">破棄</button>
+                        {% endif %}
                     </div>
                 </li>
             {% else %}
-                <li style="justify-content: center; color: #888;" data-i18n="no_items">収蔵品はまだありません。新規編纂を行ってください。</li>
+                <li style="justify-content: center; color: #888;" data-i18n="no_items">収蔵品はまだありません。</li>
             {% endfor %}
         </ul>
 
+        {% if current_user %}
         <div class="create-form">
             <h2 data-i18n="create_title">新規図鑑の編纂</h2>
             <form action="/create" method="POST" style="display: flex; gap: 1rem;">
@@ -81,27 +90,28 @@
                 <button type="submit" data-i18n="btn_create">編纂を開始する</button>
             </form>
         </div>
+        {% else %}
+        <div style="margin-top: 3rem; text-align: center; color: #888; border-top: 1px solid #ddd; padding-top: 1rem;" data-i18n="login_required">
+            ※ 新規図鑑の編纂を行うには、認証（ログイン）が必要です。
+        </div>
+        {% endif %}
     </div>
 
     <script>
         const i18n = {
             ja: {
-                title: "系統分類書架", list_title: "収蔵目録", no_items: "収蔵品はまだありません。新規編纂を行ってください。",
-                create_title: "新規図鑑の編纂", btn_rename: "改名", btn_duplicate: "複製", btn_delete: "破棄", btn_create: "編纂を開始する",
-                placeholder: "分類群の名称 (例: 脊椎動物亜門)",
-                prompt_rename: "「{0}」の新たな呼称を記述してください:",
-                prompt_dup: "「{0}」を複製します。新たな図鑑名をご指定ください:",
-                confirm_del: "図鑑「{0}」に関する全記録を破棄します。よろしいですか？",
-                err_del: "破棄処理に失敗いたしました。"
+                title: "系統分類書架", list_title: "収蔵目録", no_items: "収蔵品はまだありません。",
+                create_title: "新規図鑑の編纂", btn_rename: "改名", btn_duplicate: "複製", btn_delete: "破棄", btn_create: "編纂を開始する", btn_add_editor: "編集者追加",
+                placeholder: "分類群の名称 (例: 脊椎動物亜門)", logged_in_as: "利用者:", btn_logout: "退出", guest_msg: "閲覧者として入室中", btn_login: "認証 (ログイン)", login_required: "※ 新規図鑑の編纂を行うには、認証（ログイン）が必要です。", role_owner: "編纂主", role_editor: "編集者",
+                prompt_rename: "「{0}」の新たな呼称を記述してください:", prompt_dup: "「{0}」を複製します。新たな図鑑名をご指定ください:", prompt_editor: "「{0}」の編集権限を付与するユーザー名を入力してください:",
+                confirm_del: "図鑑「{0}」に関する全記録を破棄します。よろしいですか？", err_msg: "処理に失敗いたしました。"
             },
             en: {
-                title: "Cladogram Library", list_title: "Collection Directory", no_items: "No collections found. Please compile a new one.",
-                create_title: "Compile New Collection", btn_rename: "Rename", btn_duplicate: "Duplicate", btn_delete: "Discard", btn_create: "Compile",
-                placeholder: "Taxon Name (e.g., Vertebrata)",
-                prompt_rename: "Enter a new name for '{0}':",
-                prompt_dup: "Duplicating '{0}'. Enter the new collection name:",
-                confirm_del: "All records for '{0}' will be permanently discarded. Proceed?",
-                err_del: "Failed to discard the collection."
+                title: "Cladogram Library", list_title: "Collection Directory", no_items: "No collections found.",
+                create_title: "Compile New Collection", btn_rename: "Rename", btn_duplicate: "Duplicate", btn_delete: "Discard", btn_create: "Compile", btn_add_editor: "Add Editor",
+                placeholder: "Taxon Name (e.g., Vertebrata)", logged_in_as: "User:", btn_logout: "Logout", guest_msg: "Browsing as Guest", btn_login: "Sign In", login_required: "* You must be signed in to compile a new collection.", role_owner: "Owner", role_editor: "Editor",
+                prompt_rename: "Enter a new name for '{0}':", prompt_dup: "Duplicating '{0}'. Enter the new collection name:", prompt_editor: "Enter username to grant edit permission for '{0}':",
+                confirm_del: "All records for '{0}' will be permanently discarded. Proceed?", err_msg: "Operation failed."
             }
         };
 
@@ -110,43 +120,45 @@
         function setLang(lang) {
             currentLang = lang;
             localStorage.setItem("cladogram_lang", lang);
-            
             document.getElementById("btn-en").classList.toggle("active", lang === "en");
             document.getElementById("btn-ja").classList.toggle("active", lang === "ja");
-
             document.querySelectorAll("[data-i18n]").forEach(el => {
                 const key = el.getAttribute("data-i18n");
                 if (i18n[lang][key]) el.innerText = i18n[lang][key];
             });
-            
-            document.getElementById("input-new-name").placeholder = i18n[lang].placeholder;
+            const inputName = document.getElementById("input-new-name");
+            if(inputName) inputName.placeholder = i18n[lang].placeholder;
         }
 
         async function renameZukan(oldName) {
-            const msg = i18n[currentLang].prompt_rename.replace("{0}", oldName);
-            const newName = prompt(msg, oldName);
+            const newName = prompt(i18n[currentLang].prompt_rename.replace("{0}", oldName), oldName);
             if (!newName || newName === oldName) return;
             const res = await fetch(`/api/zukan/${oldName}/rename`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ new_name: newName }) });
-            if ((await res.json()).status === "success") location.reload();
+            if ((await res.json()).status === "success") location.reload(); else alert(i18n[currentLang].err_msg);
         }
 
         async function duplicateZukan(oldName) {
-            const msg = i18n[currentLang].prompt_dup.replace("{0}", oldName);
             const defaultName = currentLang === 'ja' ? `${oldName}の写本` : `${oldName} (Copy)`;
-            const newName = prompt(msg, defaultName);
+            const newName = prompt(i18n[currentLang].prompt_dup.replace("{0}", oldName), defaultName);
             if (!newName) return;
             const res = await fetch(`/api/zukan/${oldName}/duplicate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ new_name: newName }) });
-            if ((await res.json()).status === "success") location.reload();
+            if ((await res.json()).status === "success") location.reload(); else alert(i18n[currentLang].err_msg);
         }
 
         async function deleteZukan(zukanName) {
             if (!confirm(i18n[currentLang].confirm_del.replace("{0}", zukanName))) return;
             const res = await fetch(`/api/zukan/${zukanName}/delete`, { method: 'POST' });
-            if ((await res.json()).status === "success") location.reload();
-            else alert(i18n[currentLang].err_del);
+            if ((await res.json()).status === "success") location.reload(); else alert(i18n[currentLang].err_msg);
         }
 
-        // 初期化
+        async function addEditor(zukanName) {
+            const username = prompt(i18n[currentLang].prompt_editor.replace("{0}", zukanName));
+            if (!username) return;
+            const res = await fetch(`/api/zukan/${zukanName}/add_editor`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username }) });
+            const result = await res.json();
+            if (result.status === "success") alert("追加しました / Added successfully."); else alert(result.message || i18n[currentLang].err_msg);
+        }
+
         setLang(currentLang);
     </script>
 </body>
