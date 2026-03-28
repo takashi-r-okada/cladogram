@@ -127,7 +127,7 @@
 <body>
     <div class="top-header">
         <div class="header-left">
-            <a href="/" class="back-link" data-i18n="back_link">← 書架へ帰還する</a>
+            <a href="/" class="back-link" data-i18n="back_link">← 書架へ</a>
             <h1>{{ zukan_name }}</h1>
             {% if can_edit %}
                 <span style="font-size: 0.7rem; color: #8a2be2; border: 1px solid #8a2be2; padding: 0.1rem 0.5rem; border-radius: 4px;" data-i18n="mode_edit">編集可能</span>
@@ -138,7 +138,6 @@
         
         <div class="header-center">
             <span data-i18n="display_settings" style="color: var(--accent-color);">描画形式:</span>
-            <label><input type="radio" name="linkStyle" value="curve" onchange="changeLinkStyle()"> <span data-i18n="style_curve">曲線</span></label>
             <label><input type="radio" name="linkStyle" value="ortho" checked onchange="changeLinkStyle()"> <span data-i18n="style_ortho">直角</span></label>
             <label><input type="radio" name="linkStyle" value="radial" onchange="changeLinkStyle()"> <span data-i18n="style_radial">半円</span></label>
             
@@ -312,8 +311,8 @@
         
         const i18n = {
             ja: {
-                back_link: "← 書架へ帰還する", display_settings: "描画形式:", label_highlight: "強調:", val_none: "なし", label_fontsize: "文字:",
-                style_curve: "曲線", style_ortho: "直角", style_radial: "半円", mode_edit: "編集可能", mode_view: "閲覧専用",
+                back_link: "← 書架へ", display_settings: "描画形式:", label_highlight: "強調:", val_none: "なし", label_fontsize: "文字:",
+                style_ortho: "直角", style_radial: "半円", mode_edit: "編集可能", mode_view: "閲覧専用",
                 scroll_help: "※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺), Wクリック(折畳)",
                 btn_edit: "編集", btn_view_mode: "閲覧に戻る",
                 edit_title: "記載情報の編集", label_ja: "和名 (一般名)", label_sci: "学名",
@@ -332,8 +331,8 @@
                 new_node_name: "新分類群"
             },
             en: {
-                back_link: "← Return to Library", display_settings: "Layout:", label_highlight: "Highlight:", val_none: "None", label_fontsize: "Font:",
-                style_curve: "Curved", style_ortho: "Orthogonal", style_radial: "Radial", mode_edit: "Edit Mode", mode_view: "View Only",
+                back_link: "← Library", display_settings: "Layout:", label_highlight: "Highlight:", val_none: "None", label_fontsize: "Font:",
+                style_ortho: "Orthogonal", style_radial: "Radial", mode_edit: "Edit Mode", mode_view: "View Only",
                 scroll_help: "Nav: Scroll (Y), Shift+Scroll (X), Ctrl+Scroll (Zoom), DblClick(Collapse)",
                 btn_edit: "Edit", btn_view_mode: "View Mode",
                 edit_title: "Edit Node Record", label_ja: "Common Name", label_sci: "Scientific Name",
@@ -369,7 +368,7 @@
                 document.getElementById("input-new-group-name").placeholder = i18n[lang].placeholder_group;
                 document.getElementById("input-desc").placeholder = lang === 'ja' ? "特徴や分布などを記載..." : "Enter description...";
             }
-            
+
             updateHighlightOptions();
             if (currentNode) {
                 renderPanels();
@@ -434,8 +433,8 @@
                     applyFontSize();
                 }
                 if (state.linkStyle) {
-                    currentLinkStyle = state.linkStyle;
-                    const radio = document.querySelector(`input[name="linkStyle"][value="${state.linkStyle}"]`);
+                    currentLinkStyle = ["ortho", "radial"].includes(state.linkStyle) ? state.linkStyle : "ortho";
+                    const radio = document.querySelector(`input[name="linkStyle"][value="${currentLinkStyle}"]`);
                     if (radio) radio.checked = true;
                 }
                 if (state.transform) {
@@ -665,14 +664,23 @@
         function updateCollapseButton() {
             if (!currentNode) return;
             const hasChildren = currentNode.data.children && currentNode.data.children.length > 0;
-            const targetBoxId = isEditMode ? "editor-collapse-box" : "viewer-collapse-box";
-            const targetBtnId = isEditMode ? "btn-editor-collapse" : "btn-viewer-collapse";
-            
-            // 別のモードのボックスは隠す
-            document.getElementById(isEditMode ? "viewer-collapse-box" : "editor-collapse-box").style.display = "none";
+            const viewerBox = document.getElementById("viewer-collapse-box");
+            const viewerBtn = document.getElementById("btn-viewer-collapse");
+            const editorBox = document.getElementById("editor-collapse-box");
+            const editorBtn = document.getElementById("btn-editor-collapse");
 
-            const box = document.getElementById(targetBoxId);
-            const btn = document.getElementById(targetBtnId);
+            if (viewerBox) viewerBox.style.display = "none";
+            if (editorBox) editorBox.style.display = "none";
+
+            let box = isEditMode ? editorBox : viewerBox;
+            let btn = isEditMode ? editorBtn : viewerBtn;
+
+            // 編集モード用ボタンが未実装でも落ちないように、存在する側を利用する
+            if (!box || !btn) {
+                box = viewerBox;
+                btn = viewerBtn;
+            }
+            if (!box || !btn) return;
             
             if (hasChildren) {
                 box.style.display = "block";
@@ -888,10 +896,8 @@
                         const p1x = r1 * Math.sin(a2), p1y = -r1 * Math.cos(a2);
                         const sweep = a2 > a1 ? 1 : 0;
                         return `M${d.source.cx},${d.source.cy} A${r1},${r1} 0 0,${sweep} ${p1x},${p1y} L${d.target.cx},${d.target.cy}`;
-                    } else if (currentLinkStyle === "ortho") {
-                        return `M${d.source.cx},${d.source.cy} V${d.target.cy} H${d.target.cx}`;
                     } else {
-                        return d3.linkHorizontal().x(d => d.cx).y(d => d.cy)(d);
+                        return `M${d.source.cx},${d.source.cy} V${d.target.cy} H${d.target.cx}`;
                     }
                 });
 
