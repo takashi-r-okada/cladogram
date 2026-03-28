@@ -4,10 +4,13 @@ import shutil
 import time
 import hashlib
 import secrets
-from fastapi import FastAPI, Request, Form, Body, UploadFile, File, Cookie, Response
+import threading
+from fastapi import FastAPI, Request, Form, Body, UploadFile, File, Cookie, Response, BackgroundTasks
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+
+from generate_sample import generate_rich_cladogram
 
 app = FastAPI(title="分岐図鑑書架 (cladogram)")
 
@@ -22,6 +25,58 @@ os.makedirs(STATIC_DIR, exist_ok=True)
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.mount("/data", StaticFiles(directory=DATA_DIR), name="data")
+
+GENERATION_JOBS = {}
+GENERATION_JOBS_LOCK = threading.Lock()
+
+
+def update_generation_job(job_id: str, **fields):
+    with GENERATION_JOBS_LOCK:
+        job = GENERATION_JOBS.setdefault(job_id, {})
+        job.update(fields)
+        job["updated_at"] = time.time()
+
+
+def get_generation_job(job_id: str):
+    with GENERATION_JOBS_LOCK:
+        job = GENERATION_JOBS.get(job_id)
+        return dict(job) if job else None
+
+
+def run_generation_job(job_id: str, target_name: str, owner: str):
+    def on_progress(event: str, detail: dict):
+        update_generation_job(
+            job_id,
+            status="running",
+            event=event,
+            detail=detail,
+        )
+
+    try:
+        on_progress("initializing", {"target_name": target_name})
+        generate_rich_cladogram(target_name, owner=owner, progress_callback=on_progress)
+        update_generation_job(
+            job_id,
+            status="success",
+            event="completed",
+            detail={"target_name": target_name},
+            redirect_url=f"/editor/{target_name}",
+        )
+    except RuntimeError as exc:
+        error_code = str(exc)
+        if error_code.startswith("generation_failed:"):
+            code = "generation_failed"
+            raw_message = error_code.split(":", 1)[1]
+        else:
+            code = error_code
+            raw_message = error_code
+
+        update_generation_job(
+            job_id,
+            status="error",
+            event="error",
+            detail={"target_name": target_name, "code": code, "raw_message": raw_message},
+        )
 
 # ==========================================
 # ユーザー＆認証管理
@@ -166,6 +221,47 @@ async def create_zukan(zukan_name: str = Form(...), session_id: str = Cookie(Non
         save_meta(zukan_name, {"owner": current_user, "editors": []})
         
     return RedirectResponse(url=f"/editor/{zukan_name}", status_code=303)
+
+
+@app.post("/api/generate_sample")
+async def start_generate_sample(
+    background_tasks: BackgroundTasks,
+    payload: dict = Body(...),
+    session_id: str = Cookie(None),
+):
+    current_user = get_current_user(session_id)
+    if not current_user:
+        return {"status": "error", "code": "login_required"}
+
+    target_name = (payload.get("target_name") or "").strip()
+    if not target_name:
+        return {"status": "error", "code": "target_required"}
+
+    target_dir = os.path.join(DATA_DIR, target_name)
+    if os.path.exists(target_dir):
+        return {"status": "error", "code": "already_exists"}
+
+    job_id = secrets.token_hex(16)
+    update_generation_job(
+        job_id,
+        status="queued",
+        event="queued",
+        username=current_user,
+        detail={"target_name": target_name},
+    )
+    background_tasks.add_task(run_generation_job, job_id, target_name, current_user)
+    return {"status": "queued", "job_id": job_id}
+
+
+@app.get("/api/generate_sample/{job_id}")
+async def get_generate_sample_status(job_id: str, session_id: str = Cookie(None)):
+    current_user = get_current_user(session_id)
+    job = get_generation_job(job_id)
+    if not job:
+        return {"status": "error", "code": "job_not_found"}
+    if job.get("username") != current_user:
+        return {"status": "error", "code": "forbidden"}
+    return job
 
 @app.get("/editor/{zukan_name}")
 async def edit_zukan(request: Request, zukan_name: str, session_id: str = Cookie(None)):

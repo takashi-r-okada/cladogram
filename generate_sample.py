@@ -5,6 +5,11 @@ import requests
 from google import genai
 from google.genai import types
 
+
+def _emit_progress(progress_callback, event: str, detail: dict | None = None):
+    if progress_callback:
+        progress_callback(event, detail or {})
+
 # Wikimedia API へのリクエスト時に送る User-Agent（マナーとして設定）
 WIKI_HEADERS = {
     'User-Agent': 'CladogramApp/1.0 (Generic Biological Zukan App; contact_me@example.com)'
@@ -159,7 +164,7 @@ def get_discoverer_image_url(discoverer_name: str) -> str | None:
 # ツリー再帰処理
 # ==========================================
 
-def process_tree_node_recursive(node):
+def process_tree_node_recursive(node, progress_callback=None):
     """
     ツリーを再帰的に巡回し、各ノードに
     ・生物の画像 URL（まだ空の場合のみ）
@@ -170,6 +175,10 @@ def process_tree_node_recursive(node):
     sci_name = node.get("name_sci") or ""
 
     print(f"   ● {ja_name} ({sci_name})")
+    _emit_progress(progress_callback, "processing_node", {
+        "name_ja": ja_name,
+        "name_sci": sci_name,
+    })
 
     # --- 生物画像 ---
     if not node.get("images"):
@@ -191,24 +200,23 @@ def process_tree_node_recursive(node):
 
     # 子ノードを再帰処理
     for child in node.get("children", []):
-        process_tree_node_recursive(child)
+        process_tree_node_recursive(child, progress_callback=progress_callback)
 
 
 # ==========================================
 # メイン生成関数
 # ==========================================
 
-def generate_rich_cladogram(target_name: str, owner: str = None):
+def generate_rich_cladogram(target_name: str, owner: str = None, progress_callback=None):
     """Gemini で分類構造を生成し、Wikimedia で画像を取得して図鑑フォルダを作る"""
 
     # --- クライアント初期化 ---
     try:
         client = genai.Client()
     except Exception:
-        print("エラー: GEMINI_API_KEY が設定されていないか、無効です。")
-        print("  export GEMINI_API_KEY='あなたの API キー' を実行してください。")
-        return
+        raise RuntimeError("missing_api_key")
 
+    _emit_progress(progress_callback, "initializing", {"target_name": target_name})
     print(f"\n{'=' * 52}")
     print(f"  図鑑「{target_name}」の自動生成を開始します")
     print(f"{'=' * 52}\n")
@@ -216,6 +224,7 @@ def generate_rich_cladogram(target_name: str, owner: str = None):
     # ==========================================================
     # Step 1: Gemini で分類構造（ツリー）を生成
     # ==========================================================
+    _emit_progress(progress_callback, "building_structure", {"target_name": target_name})
     print("[Step 1] Gemini による分類構造の構築...\n")
 
     prompt = f"""
@@ -223,7 +232,7 @@ def generate_rich_cladogram(target_name: str, owner: str = None):
 「{target_name}」の分岐分類（クラドグラム）を、Wikipedia などの信頼できる分類情報を元に作成してください。
 
 要件:
-- 代表的な下位分類を 3〜5 階層程度展開してください。
+- 代表的な下位分類を 5〜7 階層程度展開してください。
 - 葉ノード（最下位）には、そのグループを代表する具体的な種の和名と学名を必ず入れてください。
 - 各ノードに以下の情報を可能な限り付与してください:
     - status: 現存なら "normal"、絶滅危惧なら "endangered"、絶滅（†）なら "extinct"
@@ -280,19 +289,20 @@ def generate_rich_cladogram(target_name: str, owner: str = None):
         tree_data = json.loads(response.text)
         print("  -> 構造の生成が完了しました。\n")
     except Exception as e:
-        print(f"Gemini API エラーまたは JSON 解析エラー: {e}")
-        return
+        raise RuntimeError(f"generation_failed:{e}") from e
 
     # ==========================================================
     # Step 2: Wikimedia で各ノードの画像・発見者肖像を取得
     # ==========================================================
+    _emit_progress(progress_callback, "fetching_images", {"target_name": target_name})
     print("[Step 2] Wikimedia による画像の探索（全ノードを巡回）...\n")
-    process_tree_node_recursive(tree_data)
+    process_tree_node_recursive(tree_data, progress_callback=progress_callback)
     print("\n  -> 画像 URL の取得が完了しました。\n")
 
     # ==========================================================
     # Step 3: ファイルを保存
     # ==========================================================
+    _emit_progress(progress_callback, "saving_files", {"target_name": target_name})
     print("[Step 3] ファイルの保存...")
 
     data_dir = os.path.join("data", target_name)
@@ -301,8 +311,7 @@ def generate_rich_cladogram(target_name: str, owner: str = None):
     meta_file = os.path.join(data_dir, "meta.json")
 
     if os.path.exists(data_dir):
-        print(f"エラー: 図鑑「{target_name}」は既に存在します。上書きを避けるため中断します。")
-        return
+        raise RuntimeError("already_exists")
 
     os.makedirs(images_dir, exist_ok=True)
 
@@ -318,6 +327,18 @@ def generate_rich_cladogram(target_name: str, owner: str = None):
     else:
         print("  オーナー: なし（閲覧専用）")
     print("  ブラウザで Web アプリを開き、トップページをリロードして確認してください。\n")
+    _emit_progress(progress_callback, "completed", {"target_name": target_name})
+    return tree_data
+
+
+def describe_generation_error(error_code: str) -> str:
+    if error_code == "missing_api_key":
+        return "エラー: GEMINI_API_KEY が設定されていないか、無効です。\n  export GEMINI_API_KEY='あなたの API キー' を実行してください。"
+    if error_code == "already_exists":
+        return "エラー: 同名の図鑑が既に存在します。"
+    if error_code.startswith("generation_failed:"):
+        return f"Gemini API エラーまたは JSON 解析エラー: {error_code.split(':', 1)[1]}"
+    return f"エラー: {error_code}"
 
 
 if __name__ == "__main__":
@@ -330,4 +351,7 @@ if __name__ == "__main__":
         "オーナーとなるユーザー名を入力してください（未入力なら閲覧専用として作成）: "
     ).strip()
 
-    generate_rich_cladogram(target, owner=owner_input if owner_input else None)
+    try:
+        generate_rich_cladogram(target, owner=owner_input if owner_input else None)
+    except RuntimeError as exc:
+        print(describe_generation_error(str(exc)))

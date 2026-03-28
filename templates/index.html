@@ -32,6 +32,9 @@
         
         .create-form { margin-top: 3rem; }
         .create-form input { padding: 0.5rem; font-size: 1rem; font-family: inherit; border: 1px solid var(--border-color); width: 60%; background: #fafafa; }
+        .form-actions { display: flex; gap: 0.5rem; }
+        .status-box { margin-top: 0.9rem; padding: 0.8rem 1rem; border: 1px solid var(--border-color); background: #fafafa; color: #444; display: none; }
+        .status-box.error { border-color: #b55; color: #8a2b2b; background: #fff7f7; }
     </style>
 </head>
 <body>
@@ -85,10 +88,14 @@
         {% if current_user %}
         <div class="create-form">
             <h2 data-i18n="create_title">新規図鑑の編纂</h2>
-            <form action="/create" method="POST" style="display: flex; gap: 1rem;">
+            <form id="generate-form" action="/create" method="POST" style="display: flex; gap: 1rem; align-items: stretch;">
                 <input type="text" name="zukan_name" id="input-new-name" placeholder="分類群の名称 (例: 脊椎動物亜門)" required>
-                <button type="submit" data-i18n="btn_create">編纂を開始する</button>
+                <div class="form-actions">
+                    <button type="submit" data-i18n="btn_create">編纂を開始する</button>
+                    <button type="button" id="btn-generate" onclick="startGenerateSample(event)" data-i18n="btn_generate_inline">自動で生成する</button>
+                </div>
             </form>
+            <div id="generation-status" class="status-box" aria-live="polite"></div>
         </div>
         {% else %}
         <div style="margin-top: 3rem; text-align: center; color: #888; border-top: 1px solid #ddd; padding-top: 1rem;" data-i18n="login_required">
@@ -104,18 +111,132 @@
                 create_title: "新規図鑑の編纂", btn_rename: "改名", btn_duplicate: "複製", btn_delete: "破棄", btn_create: "編纂を開始する", btn_add_editor: "編集者追加",
                 placeholder: "分類群の名称 (例: 脊椎動物亜門)", logged_in_as: "利用者:", btn_logout: "退出", guest_msg: "閲覧者として入室中", btn_login: "認証 (ログイン)", login_required: "※ 新規図鑑の編纂を行うには、認証（ログイン）が必要です。", role_owner: "編纂主", role_editor: "編集者",
                 prompt_rename: "「{0}」の新たな呼称を記述してください:", prompt_dup: "「{0}」を複製します。新たな図鑑名をご指定ください:", prompt_editor: "「{0}」の編集権限を付与するユーザー名を入力してください:",
-                confirm_del: "図鑑「{0}」に関する全記録を破棄します。よろしいですか？", err_msg: "処理に失敗いたしました。"
+                confirm_del: "図鑑「{0}」に関する全記録を破棄します。よろしいですか？", err_msg: "処理に失敗いたしました。",
+                btn_generate_inline: "自動で生成する",
+                confirm_generate: "「{0}」の図鑑を自動生成します。開始しますか？", target_required: "自動生成する分類群名を入力してください。", status_queued: "「{0}」の生成をキューに登録しました。", status_initializing: "生成処理を開始しています...", status_building_structure: "Gemini で分類構造を組み立てています...", status_fetching_images: "Wikimedia から画像候補を探索しています...", status_processing_node: "ノードを処理中: {0}", status_saving_files: "生成結果を保存しています...", status_completed: "生成が完了しました。図鑑ページへ移動します。", status_unknown: "生成状態を確認しています...",
+                err_login_required: "自動生成を使うにはログインが必要です。", err_already_exists: "同名の図鑑が既に存在します。別の名前を指定してください。", err_missing_api_key: "GEMINI_API_KEY が設定されていません。サーバー側で API キーを設定してください。", err_job_not_found: "生成ジョブが見つかりませんでした。", err_forbidden: "この生成ジョブの状態を見る権限がありません。", err_generation_failed: "自動生成に失敗しました。しばらくしてから再試行してください。"
             },
             en: {
                 title: "Cladogram Library", list_title: "Collection Directory", no_items: "No collections found.",
                 create_title: "Compile New Collection", btn_rename: "Rename", btn_duplicate: "Duplicate", btn_delete: "Discard", btn_create: "Compile", btn_add_editor: "Add Editor",
                 placeholder: "Taxon Name (e.g., Vertebrata)", logged_in_as: "User:", btn_logout: "Logout", guest_msg: "Browsing as Guest", btn_login: "Sign In", login_required: "* You must be signed in to compile a new collection.", role_owner: "Owner", role_editor: "Editor",
                 prompt_rename: "Enter a new name for '{0}':", prompt_dup: "Duplicating '{0}'. Enter the new collection name:", prompt_editor: "Enter username to grant edit permission for '{0}':",
-                confirm_del: "All records for '{0}' will be permanently discarded. Proceed?", err_msg: "Operation failed."
+                confirm_del: "All records for '{0}' will be permanently discarded. Proceed?", err_msg: "Operation failed.",
+                btn_generate_inline: "Generate Automatically",
+                confirm_generate: "Generate a collection for '{0}' now?", target_required: "Enter the taxon name to generate.", status_queued: "Queued generation for '{0}'.", status_initializing: "Starting the generation job...", status_building_structure: "Building the taxonomic structure with Gemini...", status_fetching_images: "Searching Wikimedia for candidate images...", status_processing_node: "Processing node: {0}", status_saving_files: "Saving generated files...", status_completed: "Generation finished. Opening the collection page.", status_unknown: "Checking generation status...",
+                err_login_required: "You must be signed in to use auto-generation.", err_already_exists: "A collection with that name already exists. Choose another name.", err_missing_api_key: "GEMINI_API_KEY is not configured on the server.", err_job_not_found: "The generation job could not be found.", err_forbidden: "You are not allowed to view this generation job.", err_generation_failed: "Auto-generation failed. Please try again later."
             }
         };
 
         let currentLang = localStorage.getItem("cladogram_lang") || "ja";
+        let currentGenerationJob = null;
+        let generationPollTimer = null;
+
+        function formatText(template, ...values) {
+            return values.reduce((text, value, index) => text.replace(`{${index}}`, value), template);
+        }
+
+        function setStatusBox(message, isError = false) {
+            const statusBox = document.getElementById("generation-status");
+            if (!statusBox) return;
+            statusBox.style.display = "block";
+            statusBox.classList.toggle("error", isError);
+            statusBox.innerText = message;
+        }
+
+        function getGenerationErrorMessage(code) {
+            if (code === "login_required") return i18n[currentLang].err_login_required;
+            if (code === "target_required") return i18n[currentLang].target_required;
+            if (code === "already_exists") return i18n[currentLang].err_already_exists;
+            if (code === "missing_api_key") return i18n[currentLang].err_missing_api_key;
+            if (code === "job_not_found") return i18n[currentLang].err_job_not_found;
+            if (code === "forbidden") return i18n[currentLang].err_forbidden;
+            if (code === "generation_failed") return i18n[currentLang].err_generation_failed;
+            return i18n[currentLang].err_msg;
+        }
+
+        function getGenerationStatusMessage(job) {
+            const detail = job.detail || {};
+            if (job.status === "error") {
+                return getGenerationErrorMessage(detail.code || job.code);
+            }
+            if (job.event === "queued") return formatText(i18n[currentLang].status_queued, detail.target_name || "");
+            if (job.event === "initializing") return i18n[currentLang].status_initializing;
+            if (job.event === "building_structure") return i18n[currentLang].status_building_structure;
+            if (job.event === "fetching_images") return i18n[currentLang].status_fetching_images;
+            if (job.event === "processing_node") return formatText(i18n[currentLang].status_processing_node, detail.name_ja || detail.name_sci || "...");
+            if (job.event === "saving_files") return i18n[currentLang].status_saving_files;
+            if (job.event === "completed") return i18n[currentLang].status_completed;
+            return i18n[currentLang].status_unknown;
+        }
+
+        function updateGenerationStatus(job) {
+            currentGenerationJob = job;
+            setStatusBox(getGenerationStatusMessage(job), job.status === "error");
+        }
+
+        async function pollGenerationJob(jobId) {
+            if (generationPollTimer) clearTimeout(generationPollTimer);
+            try {
+                const res = await fetch(`/api/generate_sample/${jobId}`);
+                const job = await res.json();
+                updateGenerationStatus(job);
+
+                if (job.status === "success") {
+                    document.getElementById("btn-generate").disabled = false;
+                    setTimeout(() => {
+                        window.location.href = job.redirect_url;
+                    }, 900);
+                    return;
+                }
+
+                if (job.status === "error") {
+                    document.getElementById("btn-generate").disabled = false;
+                    return;
+                }
+
+                generationPollTimer = setTimeout(() => pollGenerationJob(jobId), 1500);
+            } catch (_) {
+                document.getElementById("btn-generate").disabled = false;
+                setStatusBox(i18n[currentLang].err_msg, true);
+            }
+        }
+
+        async function startGenerateSample(event) {
+            if (event) event.preventDefault();
+            const input = document.getElementById("input-new-name");
+            const targetName = input.value.trim();
+            if (!targetName) {
+                alert(i18n[currentLang].target_required);
+                return;
+            }
+
+            if (!confirm(formatText(i18n[currentLang].confirm_generate, targetName))) {
+                return;
+            }
+
+            const button = document.getElementById("btn-generate");
+            button.disabled = true;
+            setStatusBox(i18n[currentLang].status_initializing);
+
+            try {
+                const res = await fetch("/api/generate_sample", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ target_name: targetName })
+                });
+                const result = await res.json();
+                if (result.status !== "queued") {
+                    button.disabled = false;
+                    setStatusBox(getGenerationErrorMessage(result.code), true);
+                    return;
+                }
+                pollGenerationJob(result.job_id);
+            } catch (_) {
+                button.disabled = false;
+                setStatusBox(i18n[currentLang].err_msg, true);
+            }
+        }
 
         function setLang(lang) {
             currentLang = lang;
@@ -128,6 +249,7 @@
             });
             const inputName = document.getElementById("input-new-name");
             if(inputName) inputName.placeholder = i18n[lang].placeholder;
+            if (currentGenerationJob) updateGenerationStatus(currentGenerationJob);
         }
 
         async function renameZukan(oldName) {
