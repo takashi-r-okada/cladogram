@@ -42,9 +42,11 @@
 
         .node circle { cursor: pointer; transition: 0.2s; }
         .node circle:hover { opacity: 0.8; }
-        .node text { font-family: inherit; font-size: 13px; fill: var(--text-color); transition: opacity 0.3s; pointer-events: none;}
+        .node text { font-family: inherit; font-size: var(--tree-font-size, 13px); fill: var(--text-color); transition: opacity 0.3s; pointer-events: none;}
         .link { fill: none; stroke: #ccc; stroke-width: 1px; transition: opacity 0.3s; }
-        .sci-name { font-family: "Times New Roman", serif; font-style: italic; font-size: 12px; }
+        .sci-name { font-family: "Times New Roman", serif; font-style: italic; font-size: var(--tree-font-size-sci, 12px); }
+        .fontsize-btn { background: none; border: 1px solid var(--border-color); cursor: pointer; padding: 0.1rem 0.45rem; font-family: inherit; font-size: 0.8rem; line-height: 1.4; color: var(--text-color); transition: 0.2s; }
+        .fontsize-btn:hover { background: var(--text-color); color: #fff; }
         
         #toast { position: fixed; bottom: 30px; left: 30px; background: var(--text-color); color: white; padding: 10px 20px; font-family: inherit; border-radius: 2px; display: none; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); letter-spacing: 1px;}
         
@@ -101,6 +103,13 @@
                 <option value="" data-i18n="val_none">なし</option>
             </select>
 
+            <span style="border-left: 1px solid var(--border-color); height: 1.5rem; margin: 0 0.5rem;"></span>
+
+            <span data-i18n="label_fontsize" style="color: var(--accent-color);">文字:</span>
+            <button class="fontsize-btn" onclick="changeFontSize(-1)">A−</button>
+            <span id="fontsize-display" style="font-size: 0.82rem; min-width: 2.8em; text-align: center; display: inline-block;">13px</span>
+            <button class="fontsize-btn" onclick="changeFontSize(1)">A＋</button>
+
             <span style="font-size: 0.75rem; color: #aaa; margin-left: 1rem;" data-i18n="scroll_help">※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺), Wクリック(折畳)</span>
         </div>
 
@@ -143,7 +152,7 @@
                     <div id="view-desc" style="font-size: 0.95rem; line-height: 1.7; color: #333; white-space: pre-wrap; margin-bottom: 1.5rem;"></div>
 
                     <div id="view-discoverer-container" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #555; background: #fff; padding: 0.5rem 0.8rem; border: 1px solid var(--border-color); border-radius: 3px;">
-                        <span data-i18n="label_discoverer" style="font-weight:bold;">発見者:</span>
+                        <span data-i18n="label_discoverer" style="font-weight:bold;">記載者:</span>
                         <img id="view-discoverer-img" src="" style="width: 24px; height: 24px; object-fit: cover; border-radius: 50%; display: none;">
                         <span id="view-discoverer-name"></span>
                     </div>
@@ -184,7 +193,7 @@
                     </div>
 
                     <div class="form-group discoverer-box">
-                        <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px dotted #ccc; padding-bottom: 0.3rem;" data-i18n="label_discoverer">発見者</div>
+                        <div style="font-weight: bold; font-size: 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px dotted #ccc; padding-bottom: 0.3rem;" data-i18n="label_discoverer">記載者</div>
                         <label data-i18n="label_discoverer_name">名前</label>
                         <input type="text" id="input-discoverer-name" style="margin-bottom: 0.5rem;">
                         <label data-i18n="label_discoverer_img">写真URL</label>
@@ -193,7 +202,7 @@
 
                     <div style="margin-bottom: 1rem; margin-top: 1.5rem;">
                         <button class="action-btn" onclick="updateNode()" data-i18n="btn_update">記載事項の更新</button>
-                        <button class="action-btn" onclick="addChildNode()" data-i18n="btn_add">＋ 派生群の追加</button>
+                        <button class="action-btn" onclick="addChildNode()" data-i18n="btn_add">＋ 派生クレードの追加</button>
                         <button class="action-btn danger" onclick="deleteNode()" data-i18n="btn_del_node">ー 当該節の破棄</button>
                     </div>
 
@@ -244,26 +253,29 @@
         const zukanName = "{{ zukan_name }}";
         let treeData = {{ tree_data | tojson | safe }};
         const canEdit = {{ 'true' if can_edit else 'false' }};
+        const currentUser = {{ current_user | tojson }};
         
         let currentNode = null;
         let currentLinkStyle = "ortho"; 
         let isEditMode = false; // モード管理フラグ
+        let currentFontSize = 13;
+        let savedZoomTransform = null; // renderTree() をまたいでズーム状態を保持
         
         const i18n = {
             ja: {
-                back_link: "← 書架へ帰還する", display_settings: "描画形式:", label_highlight: "強調:", val_none: "なし",
+                back_link: "← 書架へ帰還する", display_settings: "描画形式:", label_highlight: "強調:", val_none: "なし", label_fontsize: "文字:",
                 style_curve: "曲線", style_ortho: "直角", style_radial: "半円", mode_edit: "編集可能", mode_view: "閲覧専用",
                 scroll_help: "※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺), Wクリック(折畳)",
                 btn_edit: "編集", btn_view_mode: "閲覧に戻る",
                 edit_title: "記載情報の編集", label_ja: "和名 (一般名)", label_sci: "学名",
                 label_status: "生存状況", status_normal: "現存 (指定なし)", status_endangered: "絶滅危惧 (EN)", status_extinct: "絶滅 (EX)",
-                label_desc: "簡単な説明", label_discoverer: "発見者:", label_discoverer_name: "名前", label_discoverer_img: "写真URL",
-                btn_update: "記載事項の更新", btn_add: "＋ 派生群の追加", btn_del_node: "ー 当該節の破棄",
-                btn_collapse: "派生群を折り畳む [-]", btn_expand: "派生群を展開する [+]",
-                poly_title: "多系統群の所属", new_group_title: "新規グループの定義", btn_create_group: "定義して追加",
+                label_discoverer: "記載者:", label_discoverer_name: "氏名", label_discoverer_img: "写真URL",
+                btn_update: "記載事項の更新", btn_add: "＋ 派生クレードの追加", btn_del_node: "ー 当該クレードの削除",
+                btn_collapse: "クレードを折り畳む [-]", btn_expand: "クレードを展開する [+]",
+                poly_title: "多系統群の所属", new_group_title: "新規多系統群の定義", btn_create_group: "定義して追加",
                 msg_no_groups: "未所属", placeholder_group: "名称 (例: A類)",
                 image_title: "標本図版の追加", btn_register: "登録", drop_msg: "標本画像を此処へ投下<br>或いはクリックして選択",
-                default_msg: "※ 系統樹の節（ノード）を選択すると、詳細情報が展開されます。",
+                default_msg: "※ クラドグラム上のクレードを選択すると、詳細情報が展開されます。",
                 msg_save: "記録を保存いたしました。", msg_err_save: "保存に失敗いたしました。",
                 msg_root_del: "根源となる祖先ノードは破棄できません。", confirm_del_node: "「{0}」に関する一切の記録を破棄します。よろしいですか？",
                 msg_img_req: "画像のURLを入力してください。", msg_img_added: "図版を登録いたしました。",
@@ -271,19 +283,19 @@
                 new_node_name: "新分類群"
             },
             en: {
-                back_link: "← Return to Library", display_settings: "Layout:", label_highlight: "Highlight:", val_none: "None",
+                back_link: "← Return to Library", display_settings: "Layout:", label_highlight: "Highlight:", val_none: "None", label_fontsize: "Font:",
                 style_curve: "Curved", style_ortho: "Orthogonal", style_radial: "Radial", mode_edit: "Edit Mode", mode_view: "View Only",
                 scroll_help: "Nav: Scroll (Y), Shift+Scroll (X), Ctrl+Scroll (Zoom), DblClick(Collapse)",
                 btn_edit: "Edit", btn_view_mode: "View Mode",
                 edit_title: "Edit Node Record", label_ja: "Common Name", label_sci: "Scientific Name",
                 label_status: "Status", status_normal: "Extant (Normal)", status_endangered: "Endangered (EN)", status_extinct: "Extinct (EX)",
-                label_desc: "Description", label_discoverer: "Discoverer:", label_discoverer_name: "Name", label_discoverer_img: "Photo URL",
-                btn_update: "Update Record", btn_add: "+ Add Clade", btn_del_node: "- Discard Node",
+                label_discoverer: "Author:", label_discoverer_name: "Name", label_discoverer_img: "Photo URL",
+                btn_update: "Update Record", btn_add: "+ Add Clade", btn_del_node: "- Remove Clade",
                 btn_collapse: "Collapse Clade [-]", btn_expand: "Expand Clade [+]",
                 poly_title: "Polyphyletic Groups", new_group_title: "Define New Group", btn_create_group: "Define & Add",
                 msg_no_groups: "None", placeholder_group: "Name (e.g., Group A)",
                 image_title: "Add Specimen Plate", btn_register: "Register", drop_msg: "Drop specimen image here<br>or click to select",
-                default_msg: "* Select a node on the cladogram to expand details.",
+                default_msg: "* Select a clade on the cladogram to expand details.",
                 msg_save: "Record saved successfully.", msg_err_save: "Failed to save the record.",
                 msg_root_del: "The root ancestor node cannot be discarded.", confirm_del_node: "Discard all records for '{0}'?",
                 msg_img_req: "Please enter an image URL.", msg_img_added: "Plate registered.",
@@ -334,7 +346,53 @@
 
         function changeLinkStyle() {
             currentLinkStyle = document.querySelector('input[name="linkStyle"]:checked').value;
+            savedZoomTransform = null; // 描画形式切替時は位置をリセット
             renderTree();
+            if (currentUser) saveState();
+        }
+
+        function changeFontSize(delta) {
+            currentFontSize = Math.min(30, Math.max(8, currentFontSize + delta));
+            applyFontSize();
+            if (currentUser) saveState();
+        }
+
+        function applyFontSize() {
+            document.documentElement.style.setProperty('--tree-font-size', currentFontSize + 'px');
+            document.documentElement.style.setProperty('--tree-font-size-sci', Math.max(8, currentFontSize - 1) + 'px');
+            document.getElementById('fontsize-display').innerText = currentFontSize + 'px';
+        }
+
+        function saveState() {
+            if (!currentUser) return;
+            const key = `cladogram_view_${zukanName}_${currentUser}`;
+            localStorage.setItem(key, JSON.stringify({
+                fontSize: currentFontSize,
+                linkStyle: currentLinkStyle,
+                transform: savedZoomTransform
+            }));
+        }
+
+        function loadState() {
+            if (!currentUser) return;
+            const key = `cladogram_view_${zukanName}_${currentUser}`;
+            const raw = localStorage.getItem(key);
+            if (!raw) return;
+            try {
+                const state = JSON.parse(raw);
+                if (state.fontSize) {
+                    currentFontSize = state.fontSize;
+                    applyFontSize();
+                }
+                if (state.linkStyle) {
+                    currentLinkStyle = state.linkStyle;
+                    const radio = document.querySelector(`input[name="linkStyle"][value="${state.linkStyle}"]`);
+                    if (radio) radio.checked = true;
+                }
+                if (state.transform) {
+                    savedZoomTransform = state.transform;
+                }
+            } catch(e) {}
         }
 
         async function saveToServer(silent=false) {
@@ -711,7 +769,13 @@
 
             const svgRoot = container.append("svg").attr("width", width).attr("height", height);
             const g = svgRoot.append("g");
-            const zoom = d3.zoom().scaleExtent([0.1, 5]).on("zoom", (event) => g.attr("transform", event.transform));
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 5])
+                .on("zoom", (event) => g.attr("transform", event.transform))
+                .on("end", (event) => {
+                    savedZoomTransform = { x: event.transform.x, y: event.transform.y, k: event.transform.k };
+                    if (currentUser) saveState();
+                });
 
             svgRoot.call(zoom);
             svgRoot.on("wheel.zoom", null);
@@ -731,12 +795,20 @@
                 const maxDepth = d3.max(root.descendants(), d => d.depth) || 1;
                 const radius = Math.max(400, maxDepth * 240);
                 d3.tree().size([Math.PI, radius])(root);
-                svgRoot.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height - margin.bottom));
+                if (savedZoomTransform) {
+                    svgRoot.call(zoom.transform, d3.zoomIdentity.translate(savedZoomTransform.x, savedZoomTransform.y).scale(savedZoomTransform.k));
+                } else {
+                    svgRoot.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height - margin.bottom));
+                }
             } else {
                 d3.tree().nodeSize([65, 280])(root); 
                 let y0 = Infinity, y1 = -Infinity;
                 root.each(d => { if (d.x > y1) y1 = d.x; if (d.x < y0) y0 = d.x; });
-                svgRoot.call(zoom.transform, d3.zoomIdentity.translate(margin.left, height/2));
+                if (savedZoomTransform) {
+                    svgRoot.call(zoom.transform, d3.zoomIdentity.translate(savedZoomTransform.x, savedZoomTransform.y).scale(savedZoomTransform.k));
+                } else {
+                    svgRoot.call(zoom.transform, d3.zoomIdentity.translate(margin.left, height/2));
+                }
             }
 
             root.each(d => {
@@ -867,7 +939,7 @@
                 .style("fill", d => d.data.status === "extinct" ? "#aaa" : "#666")
                 .attr("x", getXOffset)
                 .attr("dy", "1.4em")
-                .text(d => d.data.name_sci ? `(${d.data.name_sci})` : "");
+                .text(d => d.data.name_sci ? d.data.name_sci : "");
 
             node.each(function(d) {
                 if (d.data.groups && d.data.groups.length > 0) {
@@ -925,6 +997,7 @@
 
         if(canEdit) updateColorDisplay();
         updateHighlightOptions();
+        loadState();
         setLang(currentLang);
     </script>
 </body>

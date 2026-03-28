@@ -6,59 +6,101 @@
           "children": [
             {
               "children": [],
+              "description": "東南アジアの森林に生息する、尾の長い大型のジャコウネコです。果実や小型動物を食べ、独特のポップコーンのような匂いを放ちます。",
+              "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/George_Francis_Joseph_-_Sir_Thomas_Stamford_Bingley_Raffles.jpg/500px-George_Francis_Joseph_-_Sir_Thomas_Stamford_Bingley_Raffles.jpg",
+              "discoverer_name": "Thomas Stamford Raffles",
+              "groups": [],
               "id": "arctictis_binturong",
               "images": [
                 "https://upload.wikimedia.org/wikipedia/commons/4/40/Arctictis_binturong_13.jpg"
               ],
               "name_ja": "ビントロング",
-              "name_sci": "Arctictis binturong"
+              "name_sci": "Arctictis binturong",
+              "status": "vulnerable"
             }
           ],
+          "description": "東南アジアの森林に生息する、ジャコウネコ科で最大の属の一つです。長い尾を使い、樹上での生活に適応しています。",
+          "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Temminck_Coenraad_Jacob_1770-1858.jpg/500px-Temminck_Coenraad_Jacob_1770-1858.jpg",
+          "discoverer_name": "Coenraad Jacob Temminck",
+          "groups": [],
           "id": "arctictis",
-          "images": [],
+          "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Binturong_in_Overloon.jpg/500px-Binturong_in_Overloon.jpg"
+          ],
           "name_ja": "ビントロング属",
-          "name_sci": "Arctictis"
+          "name_sci": "Arctictis",
+          "status": "normal"
         },
         {
           "children": [
             {
               "children": [],
+              "description": "東アジアから東南アジアにかけて広く分布するジャコウネコ科の動物です。顔の白い筋が特徴で、雑食性であり、日本でも外来種として知られています。",
+              "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Charles-Hamilton-Smith_%28cropped%29.webp",
+              "discoverer_name": "Charles Hamilton Smith",
+              "groups": [],
               "id": "paguma_larvata",
-              "images": [],
+              "images": [
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Palm_civet_on_tree_%28detail%29.jpg/500px-Palm_civet_on_tree_%28detail%29.jpg"
+              ],
               "name_ja": "ハクビシン",
-              "name_sci": "Paguma larvata"
+              "name_sci": "Paguma larvata",
+              "status": "normal"
             }
           ],
+          "description": "アジアに広く分布するジャコウネコ科の属で、顔に白い筋模様があるのが特徴です。雑食性で、都市部にも適応しています。",
+          "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John-Edward-Gray-1851.jpg/500px-John-Edward-Gray-1851.jpg",
+          "discoverer_name": "John Edward Gray",
+          "groups": [],
           "id": "paguma",
-          "images": [],
-          "name_ja": "タイワンジャコウネコ属",
-          "name_sci": "Paguma"
+          "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Palm_civet_on_tree_%28detail%29.jpg/500px-Palm_civet_on_tree_%28detail%29.jpg"
+          ],
+          "name_ja": "ハクビシン属",
+          "name_sci": "Paguma",
+          "status": "normal"
         },
         {
           "children": [
             {
               "children": [],
-              "groups": [
-                "group_1774661540432"
-              ],
+              "description": "南アジアおよび東南アジアに広く生息するジャコウネコ科の動物です。コーヒーチェリーを食べ、その排泄物からコピ・ルアクが作られます。",
+              "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Pallas_PS_by_Tardier_grey.jpg/500px-Pallas_PS_by_Tardier_grey.jpg",
+              "discoverer_name": "Peter Simon Pallas",
+              "groups": [],
               "id": "paradoxurus_hermaphroditus",
               "images": [
                 "https://upload.wikimedia.org/wikipedia/commons/d/d0/Paradox_hermaph_060924_ltn.jpg"
               ],
-              "name_ja": "アジアパームシベット",
-              "name_sci": "Paradoxurus hermaphroditus"
+              "name_ja": "コモンパームシベット",
+              "name_sci": "Paradoxurus hermaphroditus",
+              "status": "normal"
             }
           ],
+          "description": "アジアに生息する樹上性のジャコウネコ科の属です。果実を主食とし、特にコーヒー豆を食べることで有名です。",
+          "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/2/23/Fr%C3%A9d%C3%A9ric_Cuvier_by_Ambroise_Tardieu.jpg",
+          "discoverer_name": "Frédéric Cuvier",
+          "groups": [],
           "id": "paradoxurus",
-          "images": [],
+          "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/d/d0/Paradox_hermaph_060924_ltn.jpg"
+          ],
           "name_ja": "パームシベット属",
-          "name_sci": "Paradoxurus"
+          "name_sci": "Paradoxurus",
+          "status": "normal"
         }
       ],
+      "description": "東南アジアに分布するジャコウネコ科の一亜科で、主に樹上性です。果実を好んで食べ、コーヒー豆の消化に関わることで知られる種も含まれます。",
+      "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John-Edward-Gray-1851.jpg/500px-John-Edward-Gray-1851.jpg",
+      "discoverer_name": "John Edward Gray",
+      "groups": [],
       "id": "paradoxurinae",
-      "images": [],
-      "name_ja": "オナガジャコウネコ亜科",
-      "name_sci": "Paradoxurinae"
+      "images": [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Binturong_in_Overloon.jpg/500px-Binturong_in_Overloon.jpg"
+      ],
+      "name_ja": "パームシベット亜科",
+      "name_sci": "Paradoxurinae",
+      "status": "normal"
     },
     {
       "children": [
@@ -66,59 +108,101 @@
           "children": [
             {
               "children": [],
+              "description": "サハラ以南のアフリカに広く分布する大型のジャコウネコです。夜行性で雑食性であり、香料の原料となるジャコウを分泌します。",
+              "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Schreber_Johann_Christian_Daniel_von_1739-1810.jpg",
+              "discoverer_name": "Johann Christian Daniel von Schreber",
+              "groups": [],
               "id": "civettictis_civetta",
               "images": [
                 "https://upload.wikimedia.org/wikipedia/commons/b/bf/African_civet.jpg"
               ],
               "name_ja": "アフリカジャコウネコ",
-              "name_sci": "Civettictis civetta"
+              "name_sci": "Civettictis civetta",
+              "status": "normal"
             }
           ],
+          "description": "アフリカに生息する大型のジャコウネコ科の属です。香腺から分泌されるジャコウは、かつて香水の原料として重宝されました。",
+          "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Chelypus_indet.jpg/500px-Chelypus_indet.jpg",
+          "discoverer_name": "Reginald Innes Pocock",
+          "groups": [],
           "id": "civettictis",
-          "images": [],
+          "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Civette_Africaine_%28117442331%29.jpeg/500px-Civette_Africaine_%28117442331%29.jpeg"
+          ],
           "name_ja": "アフリカジャコウネコ属",
-          "name_sci": "Civettictis"
+          "name_sci": "Civettictis",
+          "status": "normal"
         },
         {
           "children": [
             {
               "children": [],
-              "groups": [
-                "group_1774661540432"
-              ],
+              "description": "南アジアから東南アジアにかけて生息するジャコウネコです。夜行性で、昆虫、鳥、小型哺乳類などを捕食します。",
+              "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Carl_von_Linn%C3%A9%2C_1707-1778%2C_botanist%2C_professor_%28Alexander_Roslin%29_-_Nationalmuseum_-_15723_%28cropped%29.tif/lossy-page1-500px-Carl_von_Linn%C3%A9%2C_1707-1778%2C_botanist%2C_professor_%28Alexander_Roslin%29_-_Nationalmuseum_-_15723_%28cropped%29.tif.jpg",
+              "discoverer_name": "Carl Linnaeus",
+              "groups": [],
               "id": "viverra_zibetha",
               "images": [
                 "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Large_Indian_Civet%2C_Viverra_zibetha_in_Kaeng_Krachan_national_park.jpg/500px-Large_Indian_Civet%2C_Viverra_zibetha_in_Kaeng_Krachan_national_park.jpg"
               ],
-              "name_ja": "オオジャコウネコ",
-              "name_sci": "Viverra zibetha"
+              "name_ja": "インドジャコウネコ",
+              "name_sci": "Viverra zibetha",
+              "status": "normal"
             }
           ],
+          "description": "アジアに生息するジャコウネコ科の属で、主に地上性です。体には斑点や縞模様があり、ジャコウを分泌します。",
+          "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Carl_von_Linn%C3%A9%2C_1707-1778%2C_botanist%2C_professor_%28Alexander_Roslin%29_-_Nationalmuseum_-_15723_%28cropped%29.tif/lossy-page1-500px-Carl_von_Linn%C3%A9%2C_1707-1778%2C_botanist%2C_professor_%28Alexander_Roslin%29_-_Nationalmuseum_-_15723_%28cropped%29.tif.jpg",
+          "discoverer_name": "Carl Linnaeus",
+          "groups": [],
           "id": "viverra",
-          "images": [],
+          "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Viverra_zibetha_ras.jpg/500px-Viverra_zibetha_ras.jpg"
+          ],
           "name_ja": "ジャコウネコ属",
-          "name_sci": "Viverra"
+          "name_sci": "Viverra",
+          "status": "normal"
         },
         {
           "children": [
             {
               "children": [],
+              "description": "南アジアから東南アジアにかけて広く分布する小型のジャコウネコです。夜行性で、昆虫や小型動物、果実などを食べます。",
+              "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Geoffroy_Saint-Hilaire_%C3%89tienne_1772-1844.jpg/500px-Geoffroy_Saint-Hilaire_%C3%89tienne_1772-1844.jpg",
+              "discoverer_name": "Étienne Geoffroy Saint-Hilaire",
+              "groups": [],
               "id": "viverricula_indica",
-              "images": [],
-              "name_ja": "インドジャコウネコ",
-              "name_sci": "Viverricula indica"
+              "images": [
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Small_Indian_Civet%2C_Silchar%2C_Assam%2C_India.jpg/500px-Small_Indian_Civet%2C_Silchar%2C_Assam%2C_India.jpg"
+              ],
+              "name_ja": "タイワンジャコウネコ",
+              "name_sci": "Viverricula indica",
+              "status": "normal"
             }
           ],
+          "description": "アジアに生息する小型のジャコウネコ科の属です。体には斑点があり、主に地上で活動します。",
+          "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Brian_Houghton_Hodgson_by_Louisa_Starr-Canziani.jpg/500px-Brian_Houghton_Hodgson_by_Louisa_Starr-Canziani.jpg",
+          "discoverer_name": "Brian Houghton Hodgson",
+          "groups": [],
           "id": "viverricula",
-          "images": [],
-          "name_ja": "インドジャコウネコ属",
-          "name_sci": "Viverricula"
+          "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Small_Indian_Civet%2C_Silchar%2C_Assam%2C_India.jpg/500px-Small_Indian_Civet%2C_Silchar%2C_Assam%2C_India.jpg"
+          ],
+          "name_ja": "タイワンジャコウネコ属",
+          "name_sci": "Viverricula",
+          "status": "normal"
         }
       ],
+      "description": "アフリカとアジアに分布するジャコウネコ科の亜科で、多くの種が地上性または半樹上性です。香腺から分泌されるジャコウは香料として利用されてきました。",
+      "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John-Edward-Gray-1851.jpg/500px-John-Edward-Gray-1851.jpg",
+      "discoverer_name": "John Edward Gray",
+      "groups": [],
       "id": "viverrinae",
-      "images": [],
+      "images": [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/AfricanCivet.jpg/500px-AfricanCivet.jpg"
+      ],
       "name_ja": "ジャコウネコ亜科",
-      "name_sci": "Viverrinae"
+      "name_sci": "Viverrinae",
+      "status": "normal"
     },
     {
       "children": [
@@ -126,14 +210,23 @@
           "children": [
             {
               "children": [],
+              "description": "アフリカ北部、中東、ヨーロッパ南部に分布するジェネットの代表種です。夜行性で、樹上や岩場で小型動物を捕食します。",
+              "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Carl_von_Linn%C3%A9%2C_1707-1778%2C_botanist%2C_professor_%28Alexander_Roslin%29_-_Nationalmuseum_-_15723_%28cropped%29.tif/lossy-page1-500px-Carl_von_Linn%C3%A9%2C_1707-1778%2C_botanist%2C_professor_%28Alexander_Roslin%29_-_Nationalmuseum_-_15723_%28cropped%29.tif.jpg",
+              "discoverer_name": "Carl Linnaeus",
+              "groups": [],
               "id": "genetta_genetta",
               "images": [
                 "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Genet_kat.jpg/500px-Genet_kat.jpg"
               ],
-              "name_ja": "ヨーロッパジェネット",
-              "name_sci": "Genetta genetta"
+              "name_ja": "キノボリジェネット",
+              "name_sci": "Genetta genetta",
+              "status": "normal"
             }
           ],
+          "description": "アフリカとヨーロッパ南部に生息するジャコウネコ科の属です。細身の体に斑点模様があり、樹上での生活に適応しています。",
+          "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Georges_Cuvier.png/500px-Georges_Cuvier.png",
+          "discoverer_name": "Georges Cuvier",
+          "groups": [],
           "id": "genetta",
           "images": [
             "https://upload.wikimedia.org/wikipedia/commons/9/95/Genetta_angolensis.jpg"
@@ -146,22 +239,43 @@
           "children": [
             {
               "children": [],
+              "description": "中央アフリカの熱帯雨林に生息する小型のジャコウネコです。夜行性で、主に樹上で昆虫や小型動物を捕食します。",
+              "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/G%C3%A9rard_-_Louis_XVIII_of_France_in_Coronation_Robes.jpg/500px-G%C3%A9rard_-_Louis_XVIII_of_France_in_Coronation_Robes.jpg",
+              "discoverer_name": "Louis Fraser",
+              "groups": [],
               "id": "poiana_richardsonii",
-              "images": [],
-              "name_ja": "アフリカリンサン",
-              "name_sci": "Poiana richardsonii"
+              "images": [
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Em_-_Poiana_richardsonii_2.jpg/500px-Em_-_Poiana_richardsonii_2.jpg"
+              ],
+              "name_ja": "アフリカキノボリジェネット",
+              "name_sci": "Poiana richardsonii",
+              "status": "normal"
             }
           ],
+          "description": "アフリカの熱帯雨林に生息するジャコウネコ科の属です。ジェネットに似ていますが、より樹上生活に特化しています。",
+          "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John-Edward-Gray-1851.jpg/500px-John-Edward-Gray-1851.jpg",
+          "discoverer_name": "John Edward Gray",
+          "groups": [],
           "id": "poiana",
-          "images": [],
-          "name_ja": "アフリカリンサン属",
-          "name_sci": "Poiana"
+          "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Em_-_Poiana_richardsonii_2.jpg/500px-Em_-_Poiana_richardsonii_2.jpg"
+          ],
+          "name_ja": "アフリカキノボリジェネット属",
+          "name_sci": "Poiana",
+          "status": "normal"
         }
       ],
+      "description": "アフリカとヨーロッパ南部に分布するジャコウネコ科の亜科で、細身の体と長い尾が特徴です。主に樹上性または半樹上性で、夜行性です。",
+      "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John-Edward-Gray-1851.jpg/500px-John-Edward-Gray-1851.jpg",
+      "discoverer_name": "John Edward Gray",
+      "groups": [],
       "id": "genettinae",
-      "images": [],
+      "images": [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Large-spotted_Genet_%28Genetta_tigrina%29_%2817356502041%29_%28crop%29.jpg/500px-Large-spotted_Genet_%28Genetta_tigrina%29_%2817356502041%29_%28crop%29.jpg"
+      ],
       "name_ja": "ジェネット亜科",
-      "name_sci": "Genettinae"
+      "name_sci": "Genettinae",
+      "status": "normal"
     },
     {
       "children": [
@@ -169,88 +283,84 @@
           "children": [
             {
               "children": [],
-              "groups": [
-                "group_1774661558080"
+              "description": "マレー半島、スマトラ島、ボルネオ島に生息するジャコウネコです。背中に黒い横縞があり、夜行性で昆虫や小型動物を食べます。",
+              "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John-Edward-Gray-1851.jpg/500px-John-Edward-Gray-1851.jpg",
+              "discoverer_name": "John Edward Gray",
+              "groups": [],
+              "id": "hemigalus_derbyanus",
+              "images": [
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Banded_palm_civet_10.jpg/500px-Banded_palm_civet_10.jpg"
               ],
-              "id": "chrotogale_owstoni",
-              "images": [],
-              "name_ja": "シロアゴジャコウネコ",
-              "name_sci": "Chrotogale owstoni"
+              "name_ja": "スジジャコウネコ",
+              "name_sci": "Hemigalus derbyanus",
+              "status": "near_threatened"
             }
           ],
-          "id": "chrotogale",
-          "images": [],
-          "name_ja": "シロアゴジャコウネコ属",
-          "name_sci": "Chrotogale"
+          "description": "東南アジアの森林に生息するジャコウネコ科の属です。背中に縞模様があり、主に地上で活動します。",
+          "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Isidore_Geoffroy_Saint-Hilaire.jpg",
+          "discoverer_name": "Isidore Geoffroy Saint-Hilaire",
+          "groups": [],
+          "id": "hemigalus",
+          "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Banded_palm_civet_10.jpg/500px-Banded_palm_civet_10.jpg"
+          ],
+          "name_ja": "スジジャコウネコ属",
+          "name_sci": "Hemigalus",
+          "status": "normal"
         },
         {
           "children": [
             {
               "children": [],
+              "description": "東南アジアの湿地林やマングローブ林に生息するジャコウネコです。水生動物を捕食するのに適した長い鼻と水かきを持ちます。",
+              "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John-Edward-Gray-1851.jpg/500px-John-Edward-Gray-1851.jpg",
+              "discoverer_name": "John Edward Gray",
+              "groups": [],
               "id": "cynogale_bennettii",
               "images": [
                 "https://upload.wikimedia.org/wikipedia/commons/a/ae/Mampalon_%28Cynogale_Bennettii%29.png"
               ],
-              "name_ja": "カワジャコウネコ",
-              "name_sci": "Cynogale bennettii"
+              "name_ja": "ハナナガジャコウネコ",
+              "name_sci": "Cynogale bennettii",
+              "status": "endangered"
             }
           ],
+          "description": "東南アジアの湿地や水辺に生息するジャコウネコ科の属です。水生生活に適応した特徴的な鼻を持っています。",
+          "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John-Edward-Gray-1851.jpg/500px-John-Edward-Gray-1851.jpg",
+          "discoverer_name": "John Edward Gray",
+          "groups": [],
           "id": "cynogale",
-          "images": [],
-          "name_ja": "カワジャコウネコ属",
-          "name_sci": "Cynogale"
-        }
-      ],
-      "id": "hemigalinae",
-      "images": [],
-      "name_ja": "ヘミガルス亜科",
-      "name_sci": "Hemigalinae"
-    },
-    {
-      "children": [
-        {
-          "children": [
-            {
-              "children": [],
-              "id": "prionodon_linsang",
-              "images": [],
-              "name_ja": "バンテンリンサン",
-              "name_sci": "Prionodon linsang"
-            },
-            {
-              "children": [],
-              "id": "prionodon_pardicolor",
-              "images": [],
-              "name_ja": "スポットリンサン",
-              "name_sci": "Prionodon pardicolor"
-            }
+          "images": [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Stavenn_Otter_Civet_%28Cynogale_bennettii%29.jpg/500px-Stavenn_Otter_Civet_%28Cynogale_bennettii%29.jpg"
           ],
-          "id": "prionodon",
-          "images": [],
-          "name_ja": "リンサン属",
-          "name_sci": "Prionodon"
+          "name_ja": "ハナナガジャコウネコ属",
+          "name_sci": "Cynogale",
+          "status": "normal"
         }
       ],
-      "id": "prionodontinae",
-      "images": [],
-      "name_ja": "リンサン亜科",
-      "name_sci": "Prionodontinae"
+      "description": "東南アジアに分布するジャコウネコ科の亜科で、多くの種が水辺や湿地に適応しています。特徴的な顔の模様を持つ種が多いです。",
+      "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John-Edward-Gray-1851.jpg/500px-John-Edward-Gray-1851.jpg",
+      "discoverer_name": "John Edward Gray",
+      "groups": [],
+      "id": "hemigalinae",
+      "images": [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Banded_palm_civet_10.jpg/500px-Banded_palm_civet_10.jpg"
+      ],
+      "name_ja": "スジジャコウネコ亜科",
+      "name_sci": "Hemigalinae",
+      "status": "normal"
     }
   ],
+  "description": "ジャコウネコ科は、アフリカ、ヨーロッパ南部、アジアに生息する小型から中型の肉食動物の科です。樹上性または半樹上性の種が多く、夜行性で、果実、昆虫、小型脊椎動物などを食べます。",
+  "discoverer_image": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/John-Edward-Gray-1851.jpg/500px-John-Edward-Gray-1851.jpg",
+  "discoverer_name": "John Edward Gray",
   "id": "root",
-  "images": [],
+  "images": [
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Viverrids_mosaic.jpg/500px-Viverrids_mosaic.jpg"
+  ],
   "name_ja": "ジャコウネコ科",
   "name_sci": "Viverridae",
-  "polyphyletic_groups": [
-    {
-      "color": "#8a2be2",
-      "id": "group_1774661540432",
-      "name": "あ"
-    },
-    {
-      "color": "#38e22c",
-      "id": "group_1774661558080",
-      "name": "ｎ"
-    }
-  ]
+  "polyphyletic_groups": [],
+  "status": "normal",
+  "_collapsed": false
 }
