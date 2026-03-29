@@ -2,63 +2,104 @@
 
 分岐図鑑書架は、系統分類ツリーをブラウザ上で作成・編集・共有できる Web アプリです。
 
-通常は Web 上でそのまま利用できますが、この README は**コードをダウンロードしてローカルで起動する人**向けに書いています。
+現在の構成は以下です。
+
+- バックエンド: FastAPI (`main.py`)
+- フロントエンド: React + Tailwind CSS (`frontend/`)
+- 永続データ: `data/`
 
 ## 1. 動作環境
 
 - Linux / macOS / Windows
 - Python 3.10 以上
-- `pip` が使えること
+- Node.js 18 以上
+- npm
 
-## 2. セットアップ
+## 2. インストール方法
 
-プロジェクトのルートディレクトリで実行してください。
+プロジェクトルートで実行してください。
 
-### Linux / macOS
+### 最短手順 (推奨)
+
+```bash
+make setup
+```
+
+上記で以下を実行します。
+
+- Python 仮想環境 `.venv` 作成
+- Python 依存インストール (`requirements.txt`)
+- フロントエンド依存インストール (`frontend/package.json`)
+
+### 手動セットアップ
+
+#### Linux / macOS
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install --upgrade pip
+python -m pip install --upgrade pip
 pip install -r requirements.txt
+cd frontend && npm install
 ```
 
-### Windows (PowerShell)
+#### Windows (PowerShell)
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+cd frontend; npm install
 ```
 
-## 3. サーバー起動
+## 3. 起動方法
 
-以下のどちらかで起動できます。
+### 3.1 本番相当の起動 (推奨)
+
+フロントをビルドし、FastAPI から配信します。
 
 ```bash
-python main.py
+make frontend-build
+make backend
 ```
 
-または
-
-```bash
-uvicorn main:app --host 0.0.0.0 --port 9200
-```
-
-起動後、ブラウザで以下へアクセスしてください。
+アクセス先:
 
 - http://localhost:9200
+
+### 3.2 開発モード
+
+ターミナルを 2 つ使います。
+
+ターミナル1 (API):
+
+```bash
+make backend
+```
+
+ターミナル2 (React dev server):
+
+```bash
+make frontend
+```
+
+アクセス先:
+
+- http://localhost:5173
+
+`frontend/vite.config.js` で `/api`, `/data` は 9200 へプロキシされます。
 
 ## 4. 初回利用の流れ
 
 1. `/register` でユーザー登録
 2. `/login` でログイン
-3. トップページから図鑑を新規作成
+3. トップページで図鑑を新規作成
 4. `/editor/{図鑑名}` で編集
 
 補足:
-- `data/users.json` にユーザー情報とセッション情報が保存されます。
+
+- ユーザー情報とセッションは `data/users.json` に保存されます。
 - 図鑑データは `data/{図鑑名}/tree.json` に保存されます。
 
 ## 5. Gemini API キー (自動生成機能を使う場合)
@@ -79,32 +120,47 @@ $env:GEMINI_API_KEY="あなたのAPIキー"
 ```
 
 注意:
-- API キー未設定でも、手動作成・手動編集の機能は利用できます。
-- API キーを設定したら、サーバーを再起動してください。
+
+- API キー未設定でも、手動作成・手動編集は利用できます。
+- 設定変更後はサーバーを再起動してください。
 
 ## 6. 設定ファイル
 
-`appConfig.yaml` を編集すると、樹形図エディタの初期フォントサイズを変更できます。
+`appConfig.yaml` で樹形図エディタの初期値を変更できます。
 
 ```yaml
 editor:
   default_tree_font_size: 20
+  default_initial_scale: 1.0
 ```
 
-`default_tree_font_size` は 8 から 30 の範囲で指定されます。
+範囲:
+
+- `default_tree_font_size`: 8 から 30
+- `default_initial_scale`: 0.1 から 5.0
 
 ## 7. よくあるトラブル
 
 - `ModuleNotFoundError` が出る
   - 仮想環境を有効化してから `pip install -r requirements.txt` を再実行してください。
 - `Address already in use` が出る
-  - 9200 番ポートを使っている別プロセスを停止するか、別ポートで起動してください。
+  - 9200 番ポート使用プロセスを停止するか、別ポートで起動してください。
+- `Frontend not built. Run: cd frontend && npm run build` が出る
+  - `make frontend-build` を実行してください。
 - 自動生成で `missing_api_key` が出る
-  - `GEMINI_API_KEY` の設定漏れです。設定後にサーバーを再起動してください。
+  - `GEMINI_API_KEY` を設定し、サーバーを再起動してください。
 
-## 8. 開発メモ
+## 8. 主要コマンド (Makefile)
+
+- `make setup`: 依存の初期セットアップ
+- `make backend`: FastAPI 起動
+- `make frontend`: React 開発サーバー起動
+- `make frontend-build`: フロントビルド
+- `make frontend-preview`: フロントビルド結果の確認
+- `make check`: Python構文チェック + フロントビルド検証
+
+## 9. 開発メモ
 
 - サーバー本体: `main.py`
 - 自動生成ロジック: `generate_sample.py`
-- テンプレート: `templates/`
-- 静的ファイル: `static/`
+- フロントエンド: `frontend/`

@@ -5,30 +5,29 @@ import time
 import hashlib
 import secrets
 import threading
-from urllib.parse import quote_plus
-from fastapi import FastAPI, Request, Form, Body, UploadFile, File, Cookie, Response, BackgroundTasks
-from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Body, UploadFile, File, Cookie, Response, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
 
 from generate_sample import generate_rich_cladogram
 
 app = FastAPI(title="分岐図鑑書架 (cladogram)")
 
 DATA_DIR = "data"
-TEMPLATES_DIR = "templates"
-STATIC_DIR = "static"
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
 APP_CONFIG_FILE = "appConfig.yaml"
 DEFAULT_TREE_FONT_SIZE = 20
 DEFAULT_INITIAL_SCALE = 1.0
+FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "frontend", "dist")
 
 os.makedirs(DATA_DIR, exist_ok=True)
-os.makedirs(STATIC_DIR, exist_ok=True)
 
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.mount("/data", StaticFiles(directory=DATA_DIR), name="data")
+
+# フロントエンドのビルド済みアセットを配信
+_frontend_assets = os.path.join(FRONTEND_DIST, "assets")
+if os.path.isdir(_frontend_assets):
+    app.mount("/assets", StaticFiles(directory=_frontend_assets), name="frontend-assets")
 
 
 def normalize_tree_font_size(value, default: int = DEFAULT_TREE_FONT_SIZE) -> int:
@@ -215,48 +214,18 @@ def is_owner(zukan_name: str, username: str):
 # ==========================================
 # アカウント系 ルーティング
 # ==========================================
-@app.get("/register")
-async def register_page(request: Request):
-    error = request.query_params.get("error")
-    username = request.query_params.get("username", "")
-    return templates.TemplateResponse(
-        request=request,
-        name="login.html",
-        context={"mode": "register", "error": error, "username": username},
-    )
+# ==========================================
+# JSON認証 API
+# ==========================================
+@app.get("/api/auth/me")
+async def auth_me(session_id: str = Cookie(None)):
+    username = get_current_user(session_id)
+    return {"username": username}
 
-@app.post("/register")
-async def do_register(username: str = Form(...), password: str = Form(...)):
-    try:
-        users_data = load_users()
-        if username in users_data["users"]:
-            return RedirectResponse(
-                url=f"/register?error=exists&username={quote_plus(username)}",
-                status_code=303,
-            )
-
-        hashed, salt = hash_password(password)
-        users_data["users"][username] = {"pass_hash": hashed, "salt": salt}
-        save_users(users_data)
-        return RedirectResponse(url="/login", status_code=303)
-    except Exception:
-        return RedirectResponse(
-            url=f"/register?error=failed&username={quote_plus(username)}",
-            status_code=303,
-        )
-
-@app.get("/login")
-async def login_page(request: Request):
-    error = request.query_params.get("error")
-    username = request.query_params.get("username", "")
-    return templates.TemplateResponse(
-        request=request,
-        name="login.html",
-        context={"mode": "login", "error": error, "username": username},
-    )
-
-@app.post("/login")
-async def do_login(response: Response, username: str = Form(...), password: str = Form(...)):
+@app.post("/api/auth/login")
+async def auth_login(response: Response, payload: dict = Body(...)):
+    username = payload.get("username", "").strip()
+    password = payload.get("password", "")
     users_data = load_users()
     user = users_data["users"].get(username)
     if user:
@@ -265,35 +234,49 @@ async def do_login(response: Response, username: str = Form(...), password: str 
             session_id = secrets.token_hex(32)
             users_data["sessions"][session_id] = username
             save_users(users_data)
-            # ログイン成功でクッキー発行
-            response = RedirectResponse(url="/", status_code=303)
-            response.set_cookie(key="session_id", value=session_id, httponly=True)
-            return response
-    return RedirectResponse(
-        url=f"/login?error=invalid&username={quote_plus(username)}",
-        status_code=303,
-    )
+            response.set_cookie(key="session_id", value=session_id, httponly=True, samesite="lax")
+            return {"status": "ok", "username": username}
+    return {"status": "error", "code": "invalid"}
 
-@app.get("/logout")
-async def logout(response: Response, session_id: str = Cookie(None)):
+@app.post("/api/auth/logout")
+async def auth_logout(response: Response, session_id: str = Cookie(None)):
     if session_id:
         users_data = load_users()
         if session_id in users_data["sessions"]:
             del users_data["sessions"][session_id]
             save_users(users_data)
-    response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie("session_id")
-    return response
+    return {"status": "ok"}
+
+@app.post("/api/auth/register")
+async def auth_register(payload: dict = Body(...)):
+    username = payload.get("username", "").strip()
+    password = payload.get("password", "")
+    if not username or not password:
+        return {"status": "error", "code": "invalid"}
+    try:
+        users_data = load_users()
+        if username in users_data["users"]:
+            return {"status": "error", "code": "exists"}
+        hashed, salt = hash_password(password)
+        users_data["users"][username] = {"pass_hash": hashed, "salt": salt}
+        save_users(users_data)
+        return {"status": "ok"}
+    except Exception:
+        return {"status": "error", "code": "failed"}
 
 # ==========================================
 # 図鑑・ページ系 ルーティング
 # ==========================================
-@app.get("/")
-async def read_root(request: Request, session_id: str = Cookie(None)):
+# ==========================================
+# ライブラリ API
+# ==========================================
+@app.get("/api/library")
+async def api_library(session_id: str = Cookie(None)):
     current_user = get_current_user(session_id)
     zukans = []
     if os.path.exists(DATA_DIR):
-        for d in os.listdir(DATA_DIR):
+        for d in sorted(os.listdir(DATA_DIR)):
             target_dir = os.path.join(DATA_DIR, d)
             if os.path.isdir(target_dir):
                 meta = get_meta(d)
@@ -301,35 +284,31 @@ async def read_root(request: Request, session_id: str = Cookie(None)):
                     "name": d,
                     "owner": meta.get("owner"),
                     "can_edit": can_edit(d, current_user),
-                    "is_owner": is_owner(d, current_user)
+                    "is_owner": is_owner(d, current_user),
                 })
-    return templates.TemplateResponse(request=request, name="index.html", context={
-        "zukans": zukans, "current_user": current_user
-    })
+    return {"zukans": zukans}
 
-@app.post("/create")
-async def create_zukan(zukan_name: str = Form(...), session_id: str = Cookie(None)):
+@app.post("/api/zukan/create")
+async def api_create_zukan(payload: dict = Body(...), session_id: str = Cookie(None)):
     current_user = get_current_user(session_id)
     if not current_user:
-        return RedirectResponse(url="/login", status_code=303)
-
+        return {"status": "error", "code": "login_required"}
+    zukan_name = (payload.get("zukan_name") or "").strip()
+    if not zukan_name:
+        return {"status": "error", "code": "invalid"}
     target_dir = os.path.join(DATA_DIR, zukan_name)
     images_dir = os.path.join(target_dir, "images")
     tree_file = os.path.join(target_dir, "tree.json")
-    
     if not os.path.exists(target_dir):
         os.makedirs(images_dir, exist_ok=True)
         initial_data = {
             "id": "root", "name_ja": "共通祖先", "name_sci": "Common Ancestor",
-            "status": "normal", "images": [], "groups": [], "children": []
+            "status": "normal", "images": [], "groups": [], "children": [],
         }
         with open(tree_file, "w", encoding="utf-8") as f:
             json.dump(initial_data, f, ensure_ascii=False, indent=2)
-            
-        # オーナーとして登録
         save_meta(zukan_name, {"owner": current_user, "editors": []})
-        
-    return RedirectResponse(url=f"/editor/{zukan_name}", status_code=303)
+    return {"status": "ok"}
 
 
 @app.post("/api/generate_sample")
@@ -372,29 +351,23 @@ async def get_generate_sample_status(job_id: str, session_id: str = Cookie(None)
         return {"status": "error", "code": "forbidden"}
     return job
 
-@app.get("/editor/{zukan_name}")
-async def edit_zukan(request: Request, zukan_name: str, session_id: str = Cookie(None)):
+@app.get("/api/editor/{zukan_name}/data")
+async def api_editor_data(zukan_name: str, session_id: str = Cookie(None)):
     target_dir = os.path.join(DATA_DIR, zukan_name)
     tree_file = os.path.join(target_dir, "tree.json")
     tree_data = {}
     if os.path.exists(tree_file):
         with open(tree_file, "r", encoding="utf-8") as f:
             tree_data = json.load(f)
-            
     current_user = get_current_user(session_id)
     app_config = load_app_config()
-    default_tree_font_size = app_config["editor"]["default_tree_font_size"]
-    default_initial_scale = app_config["editor"]["default_initial_scale"]
-    return templates.TemplateResponse(
-        request=request, name="editor.html", 
-        context={
-            "zukan_name": zukan_name, "tree_data": tree_data,
-            "can_edit": can_edit(zukan_name, current_user),
-            "current_user": current_user,
-            "default_tree_font_size": default_tree_font_size,
-            "default_initial_scale": default_initial_scale,
-        }
-    )
+    return {
+        "tree_data": tree_data,
+        "can_edit": can_edit(zukan_name, current_user),
+        "current_user": current_user,
+        "default_tree_font_size": app_config["editor"]["default_tree_font_size"],
+        "default_initial_scale": app_config["editor"]["default_initial_scale"],
+    }
 
 # ==========================================
 # API系 (権限チェック追加)
@@ -487,3 +460,21 @@ async def add_editor(zukan_name: str, payload: dict = Body(...), session_id: str
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=9200)
+
+# ==========================================
+# SPA フォールバック (最後に配置)
+# ==========================================
+def _spa_index():
+    idx = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.isfile(idx):
+        return FileResponse(idx)
+    return JSONResponse({"error": "Frontend not built. Run: cd frontend && npm run build"}, status_code=503)
+
+@app.get("/")
+async def spa_root():
+    return _spa_index()
+
+@app.get("/{full_path:path}")
+async def spa_fallback(full_path: str):
+    # /api, /data, /assets はここに到達しない（先にマウント済み）
+    return _spa_index()
