@@ -88,6 +88,10 @@
 
         .node circle { cursor: pointer; transition: 0.2s; }
         .node circle:hover { opacity: 0.8; }
+        .node.node--movable circle { cursor: grab; }
+        .node.node--dragging { opacity: 0.72; }
+        .node.node--dragging circle { cursor: grabbing; }
+        .node.node--drop-target > circle { stroke: #157f64; stroke-width: 3px; fill: #f4fff9; }
         .node text { font-family: inherit; font-size: var(--tree-font-size, {{ default_tree_font_size }}px); fill: var(--text-color); transition: opacity 0.3s; pointer-events: none;}
         .link { fill: none; stroke: #ccc; stroke-width: 1px; transition: opacity 0.3s; }
         .sci-name { font-family: "Times New Roman", serif; font-style: italic; font-size: var(--tree-font-size-sci, {{ default_tree_font_size - 1 }}px); }
@@ -319,13 +323,15 @@
         let currentLinkStyle = "ortho"; 
         let isEditMode = false; // モード管理フラグ
         let currentFontSize = {{ default_tree_font_size }};
+        const defaultInitialScale = {{ default_initial_scale }};
         let savedZoomTransform = null; // renderTree() をまたいでズーム状態を保持
+        let ignoreNextNodeClick = false;
         
         const i18n = {
             ja: {
                 back_link: "← 書架へ", display_settings: "描画形式:", label_highlight: "強調:", val_none: "なし", label_fontsize: "文字:",
                 style_ortho: "直角", style_radial: "半円", mode_edit: "編集可能", mode_view: "閲覧専用",
-                scroll_help: "※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺), Wクリック(折畳)",
+                scroll_help: "※ 操作: ホイール(上下), Shift+ホイール(左右), Ctrl+ホイール(縮尺), Wクリック(折畳), 節をドラッグして別の節の下へ移動",
                 btn_edit: "編集", btn_view_mode: "閲覧に戻る",
                 edit_title: "記載情報の編集", label_ja: "和名 (一般名)", label_sci: "学名",
                 label_status: "生存状況", status_normal: "現存 (指定なし)", status_endangered: "絶滅危惧 (EN)", status_extinct: "絶滅 (EX)",
@@ -340,12 +346,13 @@
                 msg_root_del: "根源となる祖先ノードは破棄できません。", confirm_del_node: "「{0}」に関する一切の記録を破棄します。よろしいですか？",
                 msg_img_req: "画像のURLを入力してください。", msg_img_added: "図版を登録いたしました。",
                 msg_uploading: "転送中...", confirm_del_img: "この図版を破棄しますか？", msg_no_img: "図版は登録されていません。",
+                msg_invalid_move: "当該クレードを、その子孫の下へ移すことはできません。",
                 new_node_name: "新分類群"
             },
             en: {
                 back_link: "← Library", display_settings: "Layout:", label_highlight: "Highlight:", val_none: "None", label_fontsize: "Font:",
                 style_ortho: "Orthogonal", style_radial: "Radial", mode_edit: "Edit Mode", mode_view: "View Only",
-                scroll_help: "Nav: Scroll (Y), Shift+Scroll (X), Ctrl+Scroll (Zoom), DblClick(Collapse)",
+                scroll_help: "Nav: Scroll (Y), Shift+Scroll (X), Ctrl+Scroll (Zoom), DblClick(Collapse), Drag nodes to move them under another node",
                 btn_edit: "Edit", btn_view_mode: "View Mode",
                 edit_title: "Edit Node Record", label_ja: "Common Name", label_sci: "Scientific Name",
                 label_status: "Status", status_normal: "Extant (Normal)", status_endangered: "Endangered (EN)", status_extinct: "Extinct (EX)",
@@ -360,6 +367,7 @@
                 msg_root_del: "The root ancestor node cannot be discarded.", confirm_del_node: "Discard all records for '{0}'?",
                 msg_img_req: "Please enter an image URL.", msg_img_added: "Plate registered.",
                 msg_uploading: "Uploading...", confirm_del_img: "Discard this plate?", msg_no_img: "No plates registered.",
+                msg_invalid_move: "You cannot move a clade under one of its descendants.",
                 new_node_name: "New Clade"
             }
         };
@@ -461,6 +469,47 @@
                 const response = await fetch(`/api/editor/${zukanName}/save`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(treeData) });
                 if ((await response.json()).status === "success" && !silent) showToast(i18n[currentLang].msg_save);
             } catch (error) { alert(i18n[currentLang].msg_err_save); }
+        }
+
+        function findNodeAndParentById(nodeId, node = treeData, parent = null) {
+            if (!node) return null;
+            if (node.id === nodeId) return { node, parent };
+            for (const child of node.children || []) {
+                const found = findNodeAndParentById(nodeId, child, node);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        function collectSubtreeIds(node, ids = new Set()) {
+            if (!node) return ids;
+            ids.add(node.id);
+            (node.children || []).forEach(child => collectSubtreeIds(child, ids));
+            return ids;
+        }
+
+        function moveNodeToParent(nodeId, newParentId) {
+            const sourceInfo = findNodeAndParentById(nodeId);
+            const targetInfo = findNodeAndParentById(newParentId);
+            if (!sourceInfo || !targetInfo || !sourceInfo.parent) {
+                return { ok: false, reason: "invalid" };
+            }
+
+            if (collectSubtreeIds(sourceInfo.node).has(newParentId)) {
+                return { ok: false, reason: "descendant" };
+            }
+
+            const siblings = sourceInfo.parent.children || [];
+            const sourceIndex = siblings.findIndex(child => child.id === nodeId);
+            if (sourceIndex === -1) {
+                return { ok: false, reason: "invalid" };
+            }
+
+            siblings.splice(sourceIndex, 1);
+            if (!targetInfo.node.children) targetInfo.node.children = [];
+            targetInfo.node.children.push(sourceInfo.node);
+            targetInfo.node._collapsed = false;
+            return { ok: true };
         }
 
         // ==========================================
@@ -867,7 +916,7 @@
                 if (savedZoomTransform) {
                     svgRoot.call(zoom.transform, d3.zoomIdentity.translate(savedZoomTransform.x, savedZoomTransform.y).scale(savedZoomTransform.k));
                 } else {
-                    svgRoot.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height - margin.bottom));
+                    svgRoot.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height - margin.bottom).scale(defaultInitialScale));
                 }
             } else {
                 d3.tree().nodeSize([65, 280])(root); 
@@ -876,7 +925,7 @@
                 if (savedZoomTransform) {
                     svgRoot.call(zoom.transform, d3.zoomIdentity.translate(savedZoomTransform.x, savedZoomTransform.y).scale(savedZoomTransform.k));
                 } else {
-                    svgRoot.call(zoom.transform, d3.zoomIdentity.translate(margin.left, height/2));
+                    svgRoot.call(zoom.transform, d3.zoomIdentity.translate(margin.left, height/2).scale(defaultInitialScale));
                 }
             }
 
@@ -914,7 +963,11 @@
                 });
 
             const node = g.selectAll(".node").data(root.descendants()).enter().append("g")
-                .attr("class", d => "node" + (d.data.children && d.data.children.length > 0 ? " node--internal" : " node--leaf"))
+                .attr("class", d => {
+                    let className = "node" + (d.data.children && d.data.children.length > 0 ? " node--internal" : " node--leaf");
+                    if (canEdit && d.depth > 0) className += " node--movable";
+                    return className;
+                })
                 .attr("transform", d => `translate(${d.cx},${d.cy})`)
                 .style("opacity", d => {
                     if (!highlightId) return 1;
@@ -933,6 +986,98 @@
                         if (svgNode) svgNode.dispatchEvent(new MouseEvent('click'));
                     }
                 });
+
+            if (canEdit) {
+                const dropThreshold = 72;
+                const dragState = {
+                    draggedId: null,
+                    startLocal: [0, 0],
+                    origin: [0, 0],
+                    moved: false,
+                    descendantIds: new Set(),
+                    dropTargetId: null
+                };
+
+                function getLocalPointer(sourceEvent) {
+                    const pointer = d3.pointer(sourceEvent, svgRoot.node());
+                    return d3.zoomTransform(svgRoot.node()).invert(pointer);
+                }
+
+                function findDropTarget(px, py) {
+                    let bestTarget = null;
+                    let bestDistance = Infinity;
+                    root.descendants().forEach(candidate => {
+                        if (dragState.descendantIds.has(candidate.data.id)) return;
+                        const distance = Math.hypot(candidate.cx - px, candidate.cy - py);
+                        if (distance < dropThreshold && distance < bestDistance) {
+                            bestTarget = candidate;
+                            bestDistance = distance;
+                        }
+                    });
+                    return bestTarget;
+                }
+
+                function paintDropTarget(nodeId) {
+                    node.classed("node--drop-target", d => d.data.id === nodeId);
+                }
+
+                const dragBehavior = d3.drag()
+                    .on("start", function(event, d) {
+                        event.sourceEvent.stopPropagation();
+                        dragState.draggedId = d.data.id;
+                        dragState.descendantIds = collectSubtreeIds(d.data);
+                        dragState.startLocal = getLocalPointer(event.sourceEvent);
+                        dragState.origin = [d.cx, d.cy];
+                        dragState.moved = false;
+                        dragState.dropTargetId = null;
+                        d3.select(this).classed("node--dragging", true).raise();
+                    })
+                    .on("drag", function(event) {
+                        if (!dragState.draggedId) return;
+                        const [px, py] = getLocalPointer(event.sourceEvent);
+                        const dx = px - dragState.startLocal[0];
+                        const dy = py - dragState.startLocal[1];
+                        if (Math.hypot(dx, dy) > 4) dragState.moved = true;
+
+                        d3.select(this).attr("transform", `translate(${dragState.origin[0] + dx},${dragState.origin[1] + dy})`);
+
+                        const dropTarget = findDropTarget(px, py);
+                        dragState.dropTargetId = dropTarget ? dropTarget.data.id : null;
+                        paintDropTarget(dragState.dropTargetId);
+                    })
+                    .on("end", function(event, d) {
+                        d3.select(this).classed("node--dragging", false);
+                        paintDropTarget(null);
+
+                        const moved = dragState.moved;
+                        const dropTargetId = dragState.dropTargetId;
+                        dragState.draggedId = null;
+                        dragState.dropTargetId = null;
+
+                        if (!moved || !dropTargetId) {
+                            if (moved) ignoreNextNodeClick = true;
+                            renderTree();
+                            return;
+                        }
+
+                        const result = moveNodeToParent(d.data.id, dropTargetId);
+                        ignoreNextNodeClick = true;
+                        if (!result.ok) {
+                            if (result.reason === "descendant") alert(i18n[currentLang].msg_invalid_move);
+                            renderTree();
+                            return;
+                        }
+
+                        currentNode = null;
+                        renderTree();
+                        saveToServer();
+
+                        const svgNode = d3.select("#tree-container").selectAll(".node").filter(nd => nd.data.id === d.data.id).node();
+                        if (svgNode) svgNode.dispatchEvent(new MouseEvent("click"));
+                    });
+
+                node.filter(d => d.depth > 0).call(dragBehavior);
+            }
 
             node.each(function(d) {
                 if (highlightId && isHighlighted(d)) {
@@ -1040,6 +1185,10 @@
             });
 
             function clickNode(event, d) {
+                if (ignoreNextNodeClick) {
+                    ignoreNextNodeClick = false;
+                    return;
+                }
                 currentNode = d;
                 isEditMode = false; // クリック時は常に閲覧モードからスタート
                 document.getElementById("default-msg").style.display = "none";

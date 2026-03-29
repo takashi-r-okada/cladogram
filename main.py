@@ -5,6 +5,7 @@ import time
 import hashlib
 import secrets
 import threading
+from urllib.parse import quote_plus
 from fastapi import FastAPI, Request, Form, Body, UploadFile, File, Cookie, Response, BackgroundTasks
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -20,6 +21,7 @@ STATIC_DIR = "static"
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
 APP_CONFIG_FILE = "appConfig.yaml"
 DEFAULT_TREE_FONT_SIZE = 20
+DEFAULT_INITIAL_SCALE = 1.0
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(STATIC_DIR, exist_ok=True)
@@ -37,16 +39,26 @@ def normalize_tree_font_size(value, default: int = DEFAULT_TREE_FONT_SIZE) -> in
     return max(8, min(30, size))
 
 
+def normalize_initial_scale(value, default: float = DEFAULT_INITIAL_SCALE) -> float:
+    try:
+        scale = float(value)
+    except (TypeError, ValueError):
+        return default
+    return max(0.1, min(5.0, scale))
+
+
 def load_app_config() -> dict:
     config = {
         "editor": {
-            "default_tree_font_size": DEFAULT_TREE_FONT_SIZE
+            "default_tree_font_size": DEFAULT_TREE_FONT_SIZE,
+            "default_initial_scale": DEFAULT_INITIAL_SCALE
         }
     }
 
     default_yaml = (
         "editor:\n"
         f"  default_tree_font_size: {DEFAULT_TREE_FONT_SIZE}\n"
+        f"  default_initial_scale: {DEFAULT_INITIAL_SCALE}\n"
     )
 
     if not os.path.exists(APP_CONFIG_FILE):
@@ -92,6 +104,9 @@ def load_app_config() -> dict:
     if isinstance(editor_cfg, dict):
         config["editor"]["default_tree_font_size"] = normalize_tree_font_size(
             editor_cfg.get("default_tree_font_size")
+        )
+        config["editor"]["default_initial_scale"] = normalize_initial_scale(
+            editor_cfg.get("default_initial_scale")
         )
 
     return config
@@ -202,22 +217,43 @@ def is_owner(zukan_name: str, username: str):
 # ==========================================
 @app.get("/register")
 async def register_page(request: Request):
-    return templates.TemplateResponse(request=request, name="login.html", context={"mode": "register"})
+    error = request.query_params.get("error")
+    username = request.query_params.get("username", "")
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={"mode": "register", "error": error, "username": username},
+    )
 
 @app.post("/register")
 async def do_register(username: str = Form(...), password: str = Form(...)):
-    users_data = load_users()
-    if username in users_data["users"]:
-        return RedirectResponse(url="/register?error=exists", status_code=303)
-    
-    hashed, salt = hash_password(password)
-    users_data["users"][username] = {"pass_hash": hashed, "salt": salt}
-    save_users(users_data)
-    return RedirectResponse(url="/login", status_code=303)
+    try:
+        users_data = load_users()
+        if username in users_data["users"]:
+            return RedirectResponse(
+                url=f"/register?error=exists&username={quote_plus(username)}",
+                status_code=303,
+            )
+
+        hashed, salt = hash_password(password)
+        users_data["users"][username] = {"pass_hash": hashed, "salt": salt}
+        save_users(users_data)
+        return RedirectResponse(url="/login", status_code=303)
+    except Exception:
+        return RedirectResponse(
+            url=f"/register?error=failed&username={quote_plus(username)}",
+            status_code=303,
+        )
 
 @app.get("/login")
 async def login_page(request: Request):
-    return templates.TemplateResponse(request=request, name="login.html", context={"mode": "login"})
+    error = request.query_params.get("error")
+    username = request.query_params.get("username", "")
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={"mode": "login", "error": error, "username": username},
+    )
 
 @app.post("/login")
 async def do_login(response: Response, username: str = Form(...), password: str = Form(...)):
@@ -233,7 +269,10 @@ async def do_login(response: Response, username: str = Form(...), password: str 
             response = RedirectResponse(url="/", status_code=303)
             response.set_cookie(key="session_id", value=session_id, httponly=True)
             return response
-    return RedirectResponse(url="/login?error=invalid", status_code=303)
+    return RedirectResponse(
+        url=f"/login?error=invalid&username={quote_plus(username)}",
+        status_code=303,
+    )
 
 @app.get("/logout")
 async def logout(response: Response, session_id: str = Cookie(None)):
@@ -345,6 +384,7 @@ async def edit_zukan(request: Request, zukan_name: str, session_id: str = Cookie
     current_user = get_current_user(session_id)
     app_config = load_app_config()
     default_tree_font_size = app_config["editor"]["default_tree_font_size"]
+    default_initial_scale = app_config["editor"]["default_initial_scale"]
     return templates.TemplateResponse(
         request=request, name="editor.html", 
         context={
@@ -352,6 +392,7 @@ async def edit_zukan(request: Request, zukan_name: str, session_id: str = Cookie
             "can_edit": can_edit(zukan_name, current_user),
             "current_user": current_user,
             "default_tree_font_size": default_tree_font_size,
+            "default_initial_scale": default_initial_scale,
         }
     )
 
