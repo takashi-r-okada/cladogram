@@ -18,6 +18,8 @@ DATA_DIR = "data"
 TEMPLATES_DIR = "templates"
 STATIC_DIR = "static"
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
+APP_CONFIG_FILE = "appConfig.yaml"
+DEFAULT_TREE_FONT_SIZE = 20
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(STATIC_DIR, exist_ok=True)
@@ -25,6 +27,74 @@ os.makedirs(STATIC_DIR, exist_ok=True)
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.mount("/data", StaticFiles(directory=DATA_DIR), name="data")
+
+
+def normalize_tree_font_size(value, default: int = DEFAULT_TREE_FONT_SIZE) -> int:
+    try:
+        size = int(value)
+    except (TypeError, ValueError):
+        return default
+    return max(8, min(30, size))
+
+
+def load_app_config() -> dict:
+    config = {
+        "editor": {
+            "default_tree_font_size": DEFAULT_TREE_FONT_SIZE
+        }
+    }
+
+    default_yaml = (
+        "editor:\n"
+        f"  default_tree_font_size: {DEFAULT_TREE_FONT_SIZE}\n"
+    )
+
+    if not os.path.exists(APP_CONFIG_FILE):
+        with open(APP_CONFIG_FILE, "w", encoding="utf-8") as f:
+            f.write(default_yaml)
+        return config
+
+    try:
+        with open(APP_CONFIG_FILE, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+    except OSError:
+        return config
+
+    parsed = {}
+    current_section = None
+
+    for raw_line in lines:
+        line = raw_line.split("#", 1)[0].rstrip()
+        if not line.strip():
+            continue
+
+        indent = len(line) - len(line.lstrip(" "))
+        stripped = line.strip()
+
+        if indent == 0 and stripped.endswith(":"):
+            current_section = stripped[:-1].strip()
+            parsed.setdefault(current_section, {})
+            continue
+
+        if ":" not in stripped:
+            continue
+
+        key, value = stripped.split(":", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+
+        if indent > 0 and current_section:
+            parsed.setdefault(current_section, {})[key] = value
+        else:
+            parsed[key] = value
+
+    editor_cfg = parsed.get("editor", {})
+    if isinstance(editor_cfg, dict):
+        config["editor"]["default_tree_font_size"] = normalize_tree_font_size(
+            editor_cfg.get("default_tree_font_size")
+        )
+
+    return config
 
 GENERATION_JOBS = {}
 GENERATION_JOBS_LOCK = threading.Lock()
@@ -273,12 +343,15 @@ async def edit_zukan(request: Request, zukan_name: str, session_id: str = Cookie
             tree_data = json.load(f)
             
     current_user = get_current_user(session_id)
+    app_config = load_app_config()
+    default_tree_font_size = app_config["editor"]["default_tree_font_size"]
     return templates.TemplateResponse(
         request=request, name="editor.html", 
         context={
             "zukan_name": zukan_name, "tree_data": tree_data,
             "can_edit": can_edit(zukan_name, current_user),
-            "current_user": current_user
+            "current_user": current_user,
+            "default_tree_font_size": default_tree_font_size,
         }
     )
 
